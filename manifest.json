@@ -1,0 +1,47 @@
+{
+  "manifest_version": "0.3",
+  "name": "Avanquest PDF API",
+  "version": "1.0.1",
+  "description": "MCP server for Avanquest PDF API - provides tools for PDF conversion, merging, compression, splitting, and more",
+  "author": {
+    "name": "Avanquest",
+    "email": "support@avanquest.com",
+    "url": "https://developers.avanquest.com"
+  },
+  "homepage": "https://developers.avanquest.com",
+  "icon": "./icon.png",
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/dist/index.js"
+      ],
+      "env": {
+        "AVANQUEST_PDF_API_KEY": "${user_config.api_key}",
+        "AVANQUEST_PDF_API_BASE_URL": "https://api-developers.avanquest.com"
+      }
+    }
+  },
+  "tools_generated": true,
+  "compatibility": {},
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "Avanquest API Key",
+      "description": "Your key from https://developers.avanquest.com",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "keywords": [
+    "pdf",
+    "convert",
+    "merge",
+    "split",
+    "compress"
+  ],
+  "license": "MIT",
+  "privacy_policies": ["https://developers.avanquest.com/privacy-policy"]
+}

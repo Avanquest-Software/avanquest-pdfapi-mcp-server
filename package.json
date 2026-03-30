@@ -1,0 +1,51 @@
+{
+  "name": "avanquest-pdfapi-mcp-server",
+  "version": "1.0.1",
+  "description": "MCP server for Avanquest PDF API - provides tools for PDF conversion, merging, compression, splitting, and more",
+  "main": "dist/index.js",
+  "bin": {
+    "avanquest-pdfapi-mcp-server": "dist/index.js"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "manifest.json",
+    "icon.png"
+  ],
+  "scripts": {
+    "clean": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "pdf",
+    "avanquest",
+    "model-context-protocol",
+    "convert",
+    "merge",
+    "compress",
+    "split"
+  ],
+  "license": "MIT",
+  "author": "Avanquest",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Avanquest-Software/Avanquest-PDF-API.git"
+  },
+  "homepage": "https://developers.avanquest.com",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.3",
+    "dotenv": "^17.2.3",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

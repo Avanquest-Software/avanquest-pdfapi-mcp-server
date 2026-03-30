@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "avanquest-pdf": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/avanquest-pdfapi-mcp-server/dist/index.js"
+      ],
+      "env": {
+        "AVANQUEST_PDF_API_KEY": "your-api-key-here",
+        "AVANQUEST_PDF_API_BASE_URL": "https://api-developers.avanquest.com"
+      },
+      "description": "PDF manipulation tools using Avanquest PDF API - convert, merge, compress, split, rotate, and more"
+    }
+  }
+}
