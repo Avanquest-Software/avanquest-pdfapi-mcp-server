@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org)
 
-MCP server that gives Claude access to PDF manipulation tools powered by the [Avanquest PDF API](https://developers.avanquest.com).
+MCP server that gives the Claude Desktop app access to PDF manipulation tools powered by the [Avanquest PDF API](https://developers.avanquest.com).
 
 ## Features
 
@@ -18,24 +18,21 @@ MCP server that gives Claude access to PDF manipulation tools powered by the [Av
 - **Analyze** PDFs for tags, forms, signatures, and attachments
 
 Input file size limit: 10 MB per file. Processed results are available for download for 10 minutes.
-Works best with Claude's Filesystem plugin for local file access.
+
+Works best with Claude's Filesystem extension for local file access.
 
 ## Installation
 
-### From the Anthropic Directory
+### From the Claude plugin extension store
 
-Install from the [Anthropic MCP Directory](https://www.anthropic.com/mcp-directory). When prompted, enter your **Avanquest PDF API key**.
+Install from [Claude plugin store](https://www.claude.com/plugins). When prompted, enter your **Avanquest PDF API key**.
 
 ### Manual Setup
 
-```bash
-npx avanquest-pdfapi-mcp-server
-```
-
-Or clone and build from source:
+Clone and build from source:
 
 ```bash
-git clone https://github.com/Avanquest-Software/Avanquest-PDF-API.git
+git clone https://github.com/Avanquest-Software/avanquest-pdfapi-mcp-server.git
 cd avanquest-pdfapi-mcp-server
 npm install
 npm run build
@@ -75,6 +72,49 @@ Extension uploads the file, extracts text from the selected pages, and saves the
 > "Add a red 'CONFIDENTIAL' watermark at 45 degrees to /Users/me/doc.pdf and save it to /Users/me/doc-watermarked.pdf"
 
 Extension uploads the file, applies the text watermark with the specified color and rotation, and saves the watermarked PDF to the specified path.
+
+## Knowledge Base
+
+`Filesystem` can be installed through the Claude's UI by selecting:
+`Settings -> Extensions -> Browse extensions -> Filesystem`. Click `Install` sliding the toggle to `Enable`.
+It can alternatively be installed manually as an MCP server, alongside the `Avanquest PDF API MCP server` by including it
+inside Claude's configuration file `claude_desktop_config.json` (see step 1. below).
+
+## Usage Preparation
+
+1. Open Claude's configuration file in an editor. You can find it from the UI by selecting `Settings -> Developer`.
+   Under `Local MCP servers` select `Edit config`. This will take you to the location of the config on your drive.
+2. The `avanquest-pdf` part, which you should include in Claude's config file above, can be found in the example
+   file: `/avanquest-pdfapi-mcp-server/mcp-config-example.json`
+3. Point to where `index.js` can be found after installation.
+4. Paste, where indicated, your API key obtained on our developer portal.
+5. The `filesystem` part should be similar to the example below:
+
+```json
+        "filesystem": {
+            "command": "C:\\PROGRA~1\\nodejs\\npx.cmd",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-filesystem",
+                "C:\\Users\\yourUserName\\Documents",
+                "C:\\Users\\yourUserName\\Downloads"
+            ]
+        }
+```
+Note: You can find where `npx` is located by running `where npx` inside cmd. You should get something like
+      `C:\Program Files\nodejs\npx.cmd` and input it as the `command` value, as shown in the code snippet above.
+
+Tip: 1. Use short 8.3 path and change `command` to `C:\\PROGRA~1\\nodejs\\npx.cmd` in order to avoid a `cmd` empty space interpreter error.
+     2. The last two arguments to `npx` are the directories you want to give Claude's filesystem extension access to.
+
+The LLM should be provided with a personal preference, by selecting: `Settings -> General`
+
+6. Inside the dialog named: `What personal preferences should Claude consider in responses?`
+   Paste the message: `At the start of every conversation, always run tool_search to discover available MCP tools before responding to any task involving files, documents, or conversions.`
+
+7. Completely close Claude (best by killing all processes through Windows' `Task Manager`).
+8. Reopen the app to apply all new settings.
+9. Run your desired task (see `Usage Examples` section).
 
 ## Privacy Policy
 
