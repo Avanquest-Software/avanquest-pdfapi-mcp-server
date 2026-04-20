@@ -23,9 +23,9 @@ Works best with Claude's Filesystem extension for local file access.
 
 ## Installation
 
-### From the Claude plugin extension store
+### From the GitHub releases
 
-Install from [Claude plugin store](https://www.claude.com/plugins). When prompted, enter your **Avanquest PDF API key**.
+Download .MCPB from [the latest release on GitHub](https://github.com/Avanquest-Software/avanquest-pdfapi-mcp-server/releases)
 
 ### Manual Setup
 
