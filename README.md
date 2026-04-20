@@ -25,7 +25,7 @@ Works best with Claude's Filesystem extension for local file access.
 
 ### From the GitHub releases
 
-Download .MCPB from [the latest release on GitHub](https://github.com/Avanquest-Software/avanquest-pdfapi-mcp-server/releases)
+Download .MCPB from [the latest release on GitHub](https://github.com/Avanquest-Software/avanquest-pdfapi-mcp-server/releases/latest/download/avanquest-pdfapi-mcp-server.mcpb)
 
 ### Manual Setup
 
