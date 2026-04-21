@@ -186,13 +186,13 @@ export class AvanquestPdfApiClient {
         const errorData = (await response.json().catch(() => ({}))) as
           | ErrorResponse
           | Record<string, unknown>;
+        console.error(
+          `[avanquest-pdf-api] Upload to ${endpoint} failed with HTTP ${response.status}:`,
+          errorData
+        );
         throw new McpError(
           ErrorCode.InternalError,
-          `API request failed with status ${response.status}: ${
-            (errorData as ErrorResponse).message ||
-            (errorData as ErrorResponse).error ||
-            "Unknown error"
-          }`
+          `PDF API request failed with HTTP ${response.status}. Please verify the input file and parameters and try again.`
         );
       }
 
@@ -202,9 +202,13 @@ export class AvanquestPdfApiClient {
       if (error instanceof McpError) {
         throw error;
       }
+      console.error(
+        `[avanquest-pdf-api] Upload to ${endpoint} failed:`,
+        error
+      );
       throw new McpError(
         ErrorCode.InternalError,
-        `Failed to upload file: ${error instanceof Error ? error.message : String(error)}`
+        "Failed to reach the PDF API. Please check your network connection and try again."
       );
     }
   }
@@ -229,13 +233,13 @@ export class AvanquestPdfApiClient {
         const errorData = (await response.json().catch(() => ({}))) as
           | ErrorResponse
           | Record<string, unknown>;
+        console.error(
+          `[avanquest-pdf-api] Status check for operation ${operationId} failed with HTTP ${response.status}:`,
+          errorData
+        );
         throw new McpError(
           ErrorCode.InternalError,
-          `Failed to check operation status: ${
-            (errorData as ErrorResponse).message ||
-            (errorData as ErrorResponse).error ||
-            "Unknown error"
-          }`
+          `Failed to check operation status (HTTP ${response.status}). Please try again.`
         );
       }
 
@@ -244,9 +248,13 @@ export class AvanquestPdfApiClient {
       if (error instanceof McpError) {
         throw error;
       }
+      console.error(
+        `[avanquest-pdf-api] Status check for operation ${operationId} failed:`,
+        error
+      );
       throw new McpError(
         ErrorCode.InternalError,
-        `Failed to check operation status: ${error instanceof Error ? error.message : String(error)}`
+        "Failed to reach the PDF API to check operation status. Please check your network connection and try again."
       );
     }
   }
@@ -283,9 +291,13 @@ export class AvanquestPdfApiClient {
       if (error instanceof McpError) {
         throw error;
       }
+      console.error(
+        `[avanquest-pdf-api] Download for operation ${operationId} failed:`,
+        error
+      );
       throw new McpError(
         ErrorCode.InternalError,
-        `Failed to download result: ${error instanceof Error ? error.message : String(error)}`
+        "Failed to reach the PDF API to download the result. Please check your network connection and try again."
       );
     }
   }
@@ -306,9 +318,13 @@ export class AvanquestPdfApiClient {
       }
 
       if (status.status === "failed") {
+        console.error(
+          `[avanquest-pdf-api] Operation ${operationId} failed:`,
+          status.error
+        );
         throw new McpError(
           ErrorCode.InternalError,
-          `Operation failed: ${status.error?.message || status.error?.error || "Unknown error"}`
+          "PDF API operation failed. Please verify the input file and parameters and try again."
         );
       }
 
