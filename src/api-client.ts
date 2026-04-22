@@ -446,11 +446,11 @@ export class AvanquestPdfApiClient {
    */
   async convertPdf(
     filePath: string,
-    convertType: string,
+    convertType: ConvertType,
     options: {
       password?: string;
       pages?: string;
-      convertPdfToExcelType?: string;
+      convertPdfToExcelType?: ConvertPdfToExcelType;
       keepTablesOnly?: boolean;
     } = {}
   ): Promise<{ operationId: string; result: Buffer }> {
@@ -515,7 +515,7 @@ export class AvanquestPdfApiClient {
     options: {
       password?: string;
       pages?: string;
-      quality?: string;
+      quality?: CompressionQuality;
     } = {}
   ): Promise<{ operationId: string; result: Buffer }> {
     await this.validateFilePath(filePath, [".pdf"]);
@@ -623,7 +623,7 @@ export class AvanquestPdfApiClient {
     options: {
       password?: string;
       pages?: string;
-      rotateDegrees?: string;
+      rotateDegrees?: RotateDegrees;
     } = {}
   ): Promise<{ operationId: string; result: Buffer }> {
     await this.validateFilePath(filePath, [".pdf"]);
@@ -650,7 +650,7 @@ export class AvanquestPdfApiClient {
     options: {
       filePath?: string;
       url?: string;
-      format?: string;
+      format?: HtmlToPdfFormat;
     }
   ): Promise<{ operationId: string; result: Buffer }> {
     if (!options.filePath && !options.url) {
@@ -830,9 +830,9 @@ export class AvanquestPdfApiClient {
       sourceFilePassword?: string;
       sourceFilePageNumber?: number;
       sourceFileScale?: number;
-      rotation?: string;
+      rotation?: WatermarkRotation;
       opacity?: number;
-      position?: string;
+      position?: WatermarkPosition;
       isBehind?: boolean;
     } = {}
   ): Promise<{ operationId: string; result: Buffer }> {
