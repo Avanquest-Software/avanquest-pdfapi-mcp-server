@@ -150,6 +150,9 @@ export class AvanquestPdfApiClient {
   private apiKey: string;
   private baseUrl: string;
   private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  private readonly UPLOAD_TIMEOUT_MS = 60_000;
+  private readonly STATUS_TIMEOUT_MS = 15_000;
+  private readonly DOWNLOAD_TIMEOUT_MS = 60_000;
 
   constructor(apiKey: string, baseUrl: string) {
     this.apiKey = apiKey;
@@ -180,6 +183,7 @@ export class AvanquestPdfApiClient {
           "X-API-KEY": this.apiKey,
         },
         body: formData,
+        signal: AbortSignal.timeout(this.UPLOAD_TIMEOUT_MS),
       });
 
       if (!response.ok) {
@@ -226,6 +230,7 @@ export class AvanquestPdfApiClient {
           headers: {
             "X-API-KEY": this.apiKey,
           },
+          signal: AbortSignal.timeout(this.STATUS_TIMEOUT_MS),
         }
       );
 
@@ -275,6 +280,7 @@ export class AvanquestPdfApiClient {
           headers: {
             "X-API-KEY": this.apiKey,
           },
+          signal: AbortSignal.timeout(this.DOWNLOAD_TIMEOUT_MS),
         }
       );
 
