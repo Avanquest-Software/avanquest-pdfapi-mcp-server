@@ -1,6 +1,6 @@
 {
   "name": "avanquest-pdfapi-mcp-server",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "MCP server for Avanquest PDF API - provides tools for PDF conversion, merging, compression, splitting, and more",
   "main": "dist/index.js",
   "bin": {
