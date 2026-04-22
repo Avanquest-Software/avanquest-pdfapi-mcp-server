@@ -3,7 +3,7 @@
  * Handles authentication, file uploads, operation polling, and result downloads
  */
 
-import { extname } from "path";
+import { basename, extname } from "path";
 import { readFile, access, stat } from "fs/promises";
 import { constants } from "fs";
 
@@ -152,19 +152,12 @@ export type WatermarkPosition =
 // Watermark rotation types
 export type WatermarkRotation = "0" | "45" | "90" | "270" | "315";
 
-// Operation result info
-export interface OperationSuccessInfo {
-  fileName?: string;
-  fileId: string;
-}
-
 // Operation status response (complete schema from swagger)
 export interface OperationStatusResponse {
   id: string;
   accountId: string;
   status: "pending" | "processing" | "completed" | "failed";
   progress?: number;
-  result?: OperationSuccessInfo;
   error?: ErrorResponse;
 }
 
@@ -175,9 +168,92 @@ export interface PdfMergeItem {
   pages?: string;
 }
 
+export interface ConvertPdfOptions {
+  password?: string;
+  pages?: string;
+  convertPdfToExcelType?: ConvertPdfToExcelType;
+  keepTablesOnly?: boolean;
+}
+
+export interface CompressPdfOptions {
+  password?: string;
+  pages?: string;
+  quality?: CompressionQuality;
+}
+
+export interface SplitPdfOptions {
+  password?: string;
+  pages?: string;
+  labelStart?: number;
+}
+
+export interface PdfToTextOptions {
+  password?: string;
+  pages?: string;
+  divider?: string;
+  convertCropped?: boolean;
+}
+
+export interface RotatePdfOptions {
+  password?: string;
+  pages?: string;
+  rotateDegrees?: RotateDegrees;
+}
+
+export interface HtmlToPdfOptions {
+  filePath?: string;
+  url?: string;
+  format?: HtmlToPdfFormat;
+}
+
+export interface ResizePdfOptions {
+  password?: string;
+  pages?: string;
+  width?: number;
+  height?: number;
+}
+
+export interface PdfToJsonOptions {
+  password?: string;
+  pages?: string;
+}
+
+export interface PdfAnalyzeTagOptions {
+  password?: string;
+  pages?: string;
+}
+
+export interface AddWatermarkToPdfOptions {
+  password?: string;
+  pages?: string;
+  text?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  fontColor?: string;
+  bold?: boolean;
+  italic?: boolean;
+  sourceFilePath?: string;
+  sourceFilePassword?: string;
+  sourceFilePageNumber?: number;
+  sourceFileScale?: number;
+  rotation?: WatermarkRotation;
+  opacity?: number;
+  position?: WatermarkPosition;
+  isBehind?: boolean;
+}
+
+// Allowed input extensions, kept here so the source of truth is in one place
+const PDF_EXTS: readonly string[] = [".pdf"];
+const IMAGE_EXTS: readonly string[] = [".jpg", ".jpeg", ".bmp", ".png", ".gif"];
+const HTML_EXTS: readonly string[] = [".html", ".htm"];
+const TEXT_EXTS: readonly string[] = [".txt"];
+const WATERMARK_SOURCE_EXTS: readonly string[] = [
+  ".pdf", ".jpg", ".jpeg", ".bmp", ".png", ".gif", ".wwf", ".tif", ".tiff",
+];
+
 export class AvanquestPdfApiClient {
-  private apiKey: string;
-  private baseUrl: string;
+  private readonly apiKey: string;
+  private readonly baseUrl: string;
   private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   private readonly UPLOAD_TIMEOUT_MS = 60_000;
   private readonly STATUS_TIMEOUT_MS = 15_000;
@@ -216,9 +292,7 @@ export class AvanquestPdfApiClient {
       });
 
       if (!response.ok) {
-        const errorData = (await response.json().catch(() => ({}))) as
-          | ErrorResponse
-          | Record<string, unknown>;
+        const errorData: unknown = await response.json().catch(() => ({}));
         console.error(
           `[avanquest-pdf-api] Upload to ${endpoint} failed with HTTP ${response.status}:`,
           errorData
@@ -272,9 +346,7 @@ export class AvanquestPdfApiClient {
       );
 
       if (!response.ok) {
-        const errorData = (await response.json().catch(() => ({}))) as
-          | ErrorResponse
-          | Record<string, unknown>;
+        const errorData: unknown = await response.json().catch(() => ({}));
         console.error(
           `[avanquest-pdf-api] Status check for operation ${operationId} failed with HTTP ${response.status}:`,
           errorData
@@ -390,7 +462,10 @@ export class AvanquestPdfApiClient {
   /**
    * Validates that a file exists and is readable
    */
-  private async validateFilePath(filePath: string, allowedExtensions?: string[]): Promise<void> {
+  private async validateFilePath(
+    filePath: string,
+    allowedExtensions?: readonly string[]
+  ): Promise<void> {
     if (allowedExtensions) {
       const ext = extname(filePath).toLowerCase();
       if (!allowedExtensions.includes(ext)) {
@@ -456,8 +531,11 @@ export class AvanquestPdfApiClient {
     filePath: string
   ): Promise<void> {
     const buffer = await this.readFileAsync(filePath);
-    const filename = filePath.split(/[/\\]/).pop()!;
-    formData.append(fieldName, new Blob([new Uint8Array(buffer)]), filename);
+    formData.append(
+      fieldName,
+      new Blob([new Uint8Array(buffer)]),
+      basename(filePath)
+    );
   }
 
   /**
@@ -466,14 +544,9 @@ export class AvanquestPdfApiClient {
   async convertPdf(
     filePath: string,
     convertType: ConvertType,
-    options: {
-      password?: string;
-      pages?: string;
-      convertPdfToExcelType?: ConvertPdfToExcelType;
-      keepTablesOnly?: boolean;
-    } = {}
+    options: ConvertPdfOptions = {}
   ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
@@ -506,7 +579,7 @@ export class AvanquestPdfApiClient {
     }
 
     // Validate all files first
-    await Promise.all(items.map((item) => this.validateFilePath(item.filePath, [".pdf"])));
+    await Promise.all(items.map((item) => this.validateFilePath(item.filePath, PDF_EXTS)));
 
     const formData = new FormData();
 
@@ -531,13 +604,9 @@ export class AvanquestPdfApiClient {
    */
   async compressPdf(
     filePath: string,
-    options: {
-      password?: string;
-      pages?: string;
-      quality?: CompressionQuality;
-    } = {}
+    options: CompressPdfOptions = {}
   ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
@@ -558,13 +627,9 @@ export class AvanquestPdfApiClient {
    */
   async splitPdf(
     filePath: string,
-    options: {
-      password?: string;
-      pages?: string;
-      labelStart?: number;
-    } = {}
+    options: SplitPdfOptions = {}
   ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
@@ -586,14 +651,9 @@ export class AvanquestPdfApiClient {
    */
   async pdfToText(
     filePath: string,
-    options: {
-      password?: string;
-      pages?: string;
-      divider?: string;
-      convertCropped?: boolean;
-    } = {}
+    options: PdfToTextOptions = {}
   ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
@@ -619,7 +679,7 @@ export class AvanquestPdfApiClient {
     pages: string,
     password?: string
   ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
@@ -639,13 +699,9 @@ export class AvanquestPdfApiClient {
    */
   async rotatePdf(
     filePath: string,
-    options: {
-      password?: string;
-      pages?: string;
-      rotateDegrees?: RotateDegrees;
-    } = {}
+    options: RotatePdfOptions = {}
   ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
@@ -666,11 +722,7 @@ export class AvanquestPdfApiClient {
    * Converts HTML content or URL to PDF
    */
   async htmlToPdf(
-    options: {
-      filePath?: string;
-      url?: string;
-      format?: HtmlToPdfFormat;
-    }
+    options: HtmlToPdfOptions
   ): Promise<{ operationId: string; result: Buffer }> {
     if (!options.filePath && !options.url) {
       throw new PdfApiValidationError(
@@ -687,7 +739,7 @@ export class AvanquestPdfApiClient {
     const formData = new FormData();
 
     if (options.filePath) {
-      await this.validateFilePath(options.filePath, [".html", ".htm"]);
+      await this.validateFilePath(options.filePath, HTML_EXTS);
       await this.appendFileToForm(formData, "file", options.filePath);
     }
 
@@ -705,7 +757,7 @@ export class AvanquestPdfApiClient {
    * Converts an image to PDF
    */
   async imgToPdf(imagePath: string): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(imagePath, [".jpg", ".jpeg", ".bmp", ".png", ".gif"]);
+    await this.validateFilePath(imagePath, IMAGE_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "image", imagePath);
@@ -721,7 +773,7 @@ export class AvanquestPdfApiClient {
    * Converts a text file to PDF
    */
   async txtToPdf(filePath: string): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".txt"]);
+    await this.validateFilePath(filePath, TEXT_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
@@ -741,7 +793,7 @@ export class AvanquestPdfApiClient {
     newPassword: string,
     currentPassword?: string
   ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
@@ -763,7 +815,7 @@ export class AvanquestPdfApiClient {
     filePath: string,
     password: string
   ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
@@ -781,14 +833,9 @@ export class AvanquestPdfApiClient {
    */
   async resizePdf(
     filePath: string,
-    options: {
-      password?: string;
-      pages?: string;
-      width?: number;
-      height?: number;
-    } = {}
+    options: ResizePdfOptions = {}
   ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
@@ -811,12 +858,9 @@ export class AvanquestPdfApiClient {
    */
   async pdfToJson(
     filePath: string,
-    options: {
-      password?: string;
-      pages?: string;
-    } = {}
+    options: PdfToJsonOptions = {}
   ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
@@ -836,24 +880,7 @@ export class AvanquestPdfApiClient {
    */
   async addWatermarkToPdf(
     filePath: string,
-    options: {
-      password?: string;
-      pages?: string;
-      text?: string;
-      fontFamily?: string;
-      fontSize?: number;
-      fontColor?: string;
-      bold?: boolean;
-      italic?: boolean;
-      sourceFilePath?: string;
-      sourceFilePassword?: string;
-      sourceFilePageNumber?: number;
-      sourceFileScale?: number;
-      rotation?: WatermarkRotation;
-      opacity?: number;
-      position?: WatermarkPosition;
-      isBehind?: boolean;
-    } = {}
+    options: AddWatermarkToPdfOptions = {}
   ): Promise<{ operationId: string; result: Buffer }> {
     if (!options.text && !options.sourceFilePath) {
       throw new PdfApiValidationError(
@@ -861,9 +888,9 @@ export class AvanquestPdfApiClient {
       );
     }
 
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
     if (options.sourceFilePath) {
-      await this.validateFilePath(options.sourceFilePath, [".pdf", ".jpg", ".jpeg", ".bmp", ".png", ".gif", ".wwf", ".tif", ".tiff"]);
+      await this.validateFilePath(options.sourceFilePath, WATERMARK_SOURCE_EXTS);
     }
 
     const formData = new FormData();
@@ -909,12 +936,9 @@ export class AvanquestPdfApiClient {
    */
   async pdfAnalyzeTag(
     filePath: string,
-    options: {
-      password?: string;
-      pages?: string;
-    } = {}
+    options: PdfAnalyzeTagOptions = {}
   ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, [".pdf"]);
+    await this.validateFilePath(filePath, PDF_EXTS);
 
     const formData = new FormData();
     await this.appendFileToForm(formData, "file", filePath);
