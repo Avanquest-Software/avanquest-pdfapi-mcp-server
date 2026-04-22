@@ -6,7 +6,36 @@
 import { extname } from "path";
 import { readFile, access, stat } from "fs/promises";
 import { constants } from "fs";
-import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
+
+/**
+ * Base error for all failures originating in the PDF API client.
+ * Higher layers (e.g. the MCP adapter) can catch this and translate
+ * to their own error types.
+ */
+export class PdfApiError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "PdfApiError";
+  }
+}
+
+/** Caller-supplied input was rejected (bad path, bad config, etc.). */
+export class PdfApiValidationError extends PdfApiError {
+  constructor(message: string) {
+    super(message);
+    this.name = "PdfApiValidationError";
+  }
+}
+
+/** The remote API or network layer failed. */
+export class PdfApiRequestError extends PdfApiError {
+  readonly statusCode?: number;
+  constructor(message: string, statusCode?: number) {
+    super(message);
+    this.name = "PdfApiRequestError";
+    this.statusCode = statusCode;
+  }
+}
 
 // Common response types
 export interface OperationResponse {
@@ -160,11 +189,11 @@ export class AvanquestPdfApiClient {
     try {
       const parsed = new URL(trimmed);
       if (parsed.protocol !== "https:") {
-        throw new McpError(ErrorCode.InvalidRequest, "API base URL must use HTTPS");
+        throw new PdfApiValidationError("API base URL must use HTTPS");
       }
     } catch (error) {
-      if (error instanceof McpError) throw error;
-      throw new McpError(ErrorCode.InvalidRequest, `Invalid API base URL: ${baseUrl}`);
+      if (error instanceof PdfApiError) throw error;
+      throw new PdfApiValidationError(`Invalid API base URL: ${baseUrl}`);
     }
     this.baseUrl = trimmed;
   }
@@ -194,24 +223,23 @@ export class AvanquestPdfApiClient {
           `[avanquest-pdf-api] Upload to ${endpoint} failed with HTTP ${response.status}:`,
           errorData
         );
-        throw new McpError(
-          ErrorCode.InternalError,
-          `PDF API request failed with HTTP ${response.status}. Please verify the input file and parameters and try again.`
+        throw new PdfApiRequestError(
+          `PDF API request failed with HTTP ${response.status}. Please verify the input file and parameters and try again.`,
+          response.status
         );
       }
 
       const result = (await response.json()) as OperationResponse;
       return result;
     } catch (error) {
-      if (error instanceof McpError) {
+      if (error instanceof PdfApiError) {
         throw error;
       }
       console.error(
         `[avanquest-pdf-api] Upload to ${endpoint} failed:`,
         error
       );
-      throw new McpError(
-        ErrorCode.InternalError,
+      throw new PdfApiRequestError(
         "Failed to reach the PDF API. Please check your network connection and try again."
       );
     }
@@ -242,23 +270,22 @@ export class AvanquestPdfApiClient {
           `[avanquest-pdf-api] Status check for operation ${operationId} failed with HTTP ${response.status}:`,
           errorData
         );
-        throw new McpError(
-          ErrorCode.InternalError,
-          `Failed to check operation status (HTTP ${response.status}). Please try again.`
+        throw new PdfApiRequestError(
+          `Failed to check operation status (HTTP ${response.status}). Please try again.`,
+          response.status
         );
       }
 
       return (await response.json()) as OperationStatusResponse;
     } catch (error) {
-      if (error instanceof McpError) {
+      if (error instanceof PdfApiError) {
         throw error;
       }
       console.error(
         `[avanquest-pdf-api] Status check for operation ${operationId} failed:`,
         error
       );
-      throw new McpError(
-        ErrorCode.InternalError,
+      throw new PdfApiRequestError(
         "Failed to reach the PDF API to check operation status. Please check your network connection and try again."
       );
     }
@@ -285,24 +312,23 @@ export class AvanquestPdfApiClient {
       );
 
       if (!response.ok) {
-        throw new McpError(
-          ErrorCode.InternalError,
-          `Failed to download result: HTTP ${response.status}`
+        throw new PdfApiRequestError(
+          `Failed to download result: HTTP ${response.status}`,
+          response.status
         );
       }
 
       const arrayBuffer = await response.arrayBuffer();
       return Buffer.from(arrayBuffer);
     } catch (error) {
-      if (error instanceof McpError) {
+      if (error instanceof PdfApiError) {
         throw error;
       }
       console.error(
         `[avanquest-pdf-api] Download for operation ${operationId} failed:`,
         error
       );
-      throw new McpError(
-        ErrorCode.InternalError,
+      throw new PdfApiRequestError(
         "Failed to reach the PDF API to download the result. Please check your network connection and try again."
       );
     }
@@ -328,8 +354,7 @@ export class AvanquestPdfApiClient {
           `[avanquest-pdf-api] Operation ${operationId} failed:`,
           status.error
         );
-        throw new McpError(
-          ErrorCode.InternalError,
+        throw new PdfApiRequestError(
           "PDF API operation failed. Please verify the input file and parameters and try again."
         );
       }
@@ -338,8 +363,7 @@ export class AvanquestPdfApiClient {
       await new Promise((resolve) => setTimeout(resolve, intervalMs));
     }
 
-    throw new McpError(
-      ErrorCode.InternalError,
+    throw new PdfApiRequestError(
       `Operation timed out after ${maxAttempts} attempts`
     );
   }
@@ -351,8 +375,7 @@ export class AvanquestPdfApiClient {
     if (allowedExtensions) {
       const ext = extname(filePath).toLowerCase();
       if (!allowedExtensions.includes(ext)) {
-        throw new McpError(
-          ErrorCode.InvalidRequest,
+        throw new PdfApiValidationError(
           `File type not allowed. Expected: ${allowedExtensions.join(", ")}. Got: ${ext || "(no extension)"}`
         );
       }
@@ -361,8 +384,7 @@ export class AvanquestPdfApiClient {
     try {
       await access(filePath, constants.R_OK);
     } catch (error) {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
+      throw new PdfApiValidationError(
         `File not found or not readable: ${filePath}`
       );
     }
@@ -379,17 +401,15 @@ export class AvanquestPdfApiClient {
       const stats = await stat(filePath);
       if (stats.size > this.MAX_FILE_SIZE) {
         const sizeMB = (stats.size / (1024 * 1024)).toFixed(2);
-        throw new McpError(
-          ErrorCode.InvalidRequest,
+        throw new PdfApiValidationError(
           `File size (${sizeMB}MB) exceeds maximum allowed size (10MB): ${filePath}`
         );
       }
     } catch (error) {
-      if (error instanceof McpError) {
+      if (error instanceof PdfApiError) {
         throw error;
       }
-      throw new McpError(
-        ErrorCode.InternalError,
+      throw new PdfApiRequestError(
         `Failed to check file size: ${error instanceof Error ? error.message : String(error)}`
       );
     }
@@ -402,8 +422,7 @@ export class AvanquestPdfApiClient {
     try {
       return await readFile(filePath);
     } catch (error) {
-      throw new McpError(
-        ErrorCode.InternalError,
+      throw new PdfApiRequestError(
         `Failed to read file: ${error instanceof Error ? error.message : String(error)}`
       );
     }
@@ -462,8 +481,7 @@ export class AvanquestPdfApiClient {
     items: PdfMergeItem[]
   ): Promise<{ operationId: string; result: Buffer }> {
     if (items.length < 2) {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
+      throw new PdfApiValidationError(
         "At least 2 files are required for merging"
       );
     }
@@ -636,15 +654,13 @@ export class AvanquestPdfApiClient {
     }
   ): Promise<{ operationId: string; result: Buffer }> {
     if (!options.filePath && !options.url) {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
+      throw new PdfApiValidationError(
         "Either filePath or url must be provided"
       );
     }
 
     if (options.filePath && options.url) {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
+      throw new PdfApiValidationError(
         "Only one of filePath or url should be provided, not both"
       );
     }
@@ -821,8 +837,7 @@ export class AvanquestPdfApiClient {
     } = {}
   ): Promise<{ operationId: string; result: Buffer }> {
     if (!options.text && !options.sourceFilePath) {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
+      throw new PdfApiValidationError(
         "Either text or sourceFilePath must be provided for watermark"
       );
     }
