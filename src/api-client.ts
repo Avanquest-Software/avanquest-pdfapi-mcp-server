@@ -229,8 +229,17 @@ export class AvanquestPdfApiClient {
         );
       }
 
-      const result = (await response.json()) as OperationResponse;
-      return result;
+      const result = (await response.json()) as Partial<OperationResponse>;
+      if (typeof result?.id !== "string" || result.id.length === 0) {
+        console.error(
+          `[avanquest-pdf-api] Upload to ${endpoint} returned an invalid response body:`,
+          result
+        );
+        throw new PdfApiRequestError(
+          "PDF API returned an invalid operation response (missing id)."
+        );
+      }
+      return result as OperationResponse;
     } catch (error) {
       if (error instanceof PdfApiError) {
         throw error;
@@ -345,18 +354,28 @@ export class AvanquestPdfApiClient {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const status = await this.checkOperationStatus(operationId);
 
-      if (status.status === "completed") {
-        return;
-      }
-
-      if (status.status === "failed") {
-        console.error(
-          `[avanquest-pdf-api] Operation ${operationId} failed:`,
-          status.error
-        );
-        throw new PdfApiRequestError(
-          "PDF API operation failed. Please verify the input file and parameters and try again."
-        );
+      switch (status.status) {
+        case "completed":
+          return;
+        case "failed":
+          console.error(
+            `[avanquest-pdf-api] Operation ${operationId} failed:`,
+            status.error
+          );
+          throw new PdfApiRequestError(
+            "PDF API operation failed. Please verify the input file and parameters and try again."
+          );
+        case "pending":
+        case "processing":
+          break;
+        default:
+          console.error(
+            `[avanquest-pdf-api] Operation ${operationId} returned an unknown status:`,
+            status
+          );
+          throw new PdfApiRequestError(
+            `PDF API returned an unknown operation status: ${String(status.status)}`
+          );
       }
 
       // Wait before next poll
