@@ -4,12 +4,13 @@ import { z } from "zod";
 import { writeFile } from "fs/promises";
 import { AvanquestPdfApiClient } from "./api-client.js";
 import * as schemas from "./tools.js";
-import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolResult, McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 
 function validateOutputPath(outputPath: string, allowedExtension: string): void {
   const ext = extname(outputPath).toLowerCase();
   if (ext !== allowedExtension) {
-    throw new Error(
+    throw new McpError(
+      ErrorCode.InvalidRequest,
       `Output path must have extension ${allowedExtension}. Got: ${ext || "(no extension)"}`
     );
   }
@@ -85,12 +86,12 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.PdfConvertToWordSchema>) => {
       try {
         const input = schemas.PdfConvertToWordSchema.parse(params);
+        validateOutputPath(input.outputPath, ".docx");
         const result = await apiClient.convertPdf(input.filePath, "word", {
           password: input.password,
           pages: input.pages,
         });
 
-        validateOutputPath(input.outputPath, ".docx");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully converted PDF to Word format.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -113,6 +114,7 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.PdfConvertToPowerPointSchema>) => {
       try {
         const input = schemas.PdfConvertToPowerPointSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pptx");
         const result = await apiClient.convertPdf(
           input.filePath,
           "powerPoint",
@@ -122,7 +124,6 @@ export function createMcpServer() {
           }
         );
 
-        validateOutputPath(input.outputPath, ".pptx");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -145,6 +146,7 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.PdfConvertToExcelSchema>) => {
       try {
         const input = schemas.PdfConvertToExcelSchema.parse(params);
+        validateOutputPath(input.outputPath, ".xlsx");
         const result = await apiClient.convertPdf(input.filePath, "excel", {
           password: input.password,
           pages: input.pages,
@@ -152,7 +154,6 @@ export function createMcpServer() {
           keepTablesOnly: input.keepTablesOnly,
         });
 
-        validateOutputPath(input.outputPath, ".xlsx");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -175,9 +176,9 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.PdfMergeSchema>) => {
       try {
         const input = schemas.PdfMergeSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
         const result = await apiClient.mergePdfs(input.files);
 
-        validateOutputPath(input.outputPath, ".pdf");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -200,13 +201,13 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.PdfCompressSchema>) => {
       try {
         const input = schemas.PdfCompressSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
         const result = await apiClient.compressPdf(input.filePath, {
           password: input.password,
           pages: input.pages,
           quality: input.quality,
         });
 
-        validateOutputPath(input.outputPath, ".pdf");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -229,13 +230,13 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.PdfSplitSchema>) => {
       try {
         const input = schemas.PdfSplitSchema.parse(params);
+        validateOutputPath(input.outputPath, ".zip");
         const result = await apiClient.splitPdf(input.filePath, {
           password: input.password,
           pages: input.pages,
           labelStart: input.labelStart,
         });
 
-        validateOutputPath(input.outputPath, ".zip");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -258,6 +259,7 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.PdfToTextSchema>) => {
       try {
         const input = schemas.PdfToTextSchema.parse(params);
+        validateOutputPath(input.outputPath, ".txt");
         const result = await apiClient.pdfToText(input.filePath, {
           password: input.password,
           pages: input.pages,
@@ -265,7 +267,6 @@ export function createMcpServer() {
           convertCropped: input.convertCropped,
         });
 
-        validateOutputPath(input.outputPath, ".txt");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -288,13 +289,13 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.DeletePdfPagesSchema>) => {
       try {
         const input = schemas.DeletePdfPagesSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
         const result = await apiClient.deletePdfPages(
           input.filePath,
           input.pages,
           input.password
         );
 
-        validateOutputPath(input.outputPath, ".pdf");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -317,13 +318,13 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.RotatePdfSchema>) => {
       try {
         const input = schemas.RotatePdfSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
         const result = await apiClient.rotatePdf(input.filePath, {
           password: input.password,
           pages: input.pages,
           rotateDegrees: input.rotateDegrees,
         });
 
-        validateOutputPath(input.outputPath, ".pdf");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -346,13 +347,13 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.HtmlToPdfSchema>) => {
       try {
         const input = schemas.HtmlToPdfSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
         const result = await apiClient.htmlToPdf({
           filePath: input.filePath,
           url: input.url,
           format: input.format,
         });
 
-        validateOutputPath(input.outputPath, ".pdf");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully converted HTML to PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -375,9 +376,9 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.ImgToPdfSchema>) => {
       try {
         const input = schemas.ImgToPdfSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
         const result = await apiClient.imgToPdf(input.imagePath);
 
-        validateOutputPath(input.outputPath, ".pdf");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully converted image to PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -400,9 +401,9 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.TxtToPdfSchema>) => {
       try {
         const input = schemas.TxtToPdfSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
         const result = await apiClient.txtToPdf(input.filePath);
 
-        validateOutputPath(input.outputPath, ".pdf");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully converted text file to PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -425,13 +426,13 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.PasswordProtectPdfSchema>) => {
       try {
         const input = schemas.PasswordProtectPdfSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
         const result = await apiClient.passwordProtectPdf(
           input.filePath,
           input.newPassword,
           input.password
         );
 
-        validateOutputPath(input.outputPath, ".pdf");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully password-protected PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -454,9 +455,9 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.UnlockPdfSchema>) => {
       try {
         const input = schemas.UnlockPdfSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
         const result = await apiClient.unlockPdf(input.filePath, input.password);
 
-        validateOutputPath(input.outputPath, ".pdf");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully unlocked PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -479,6 +480,7 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.ResizePdfSchema>) => {
       try {
         const input = schemas.ResizePdfSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
         const result = await apiClient.resizePdf(input.filePath, {
           password: input.password,
           pages: input.pages,
@@ -486,7 +488,6 @@ export function createMcpServer() {
           height: input.height,
         });
 
-        validateOutputPath(input.outputPath, ".pdf");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully resized PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
@@ -509,12 +510,12 @@ export function createMcpServer() {
     async (params: z.infer<typeof schemas.PdfToJsonSchema>) => {
       try {
         const input = schemas.PdfToJsonSchema.parse(params);
+        validateOutputPath(input.outputPath, ".json");
         const result = await apiClient.pdfToJson(input.filePath, {
           password: input.password,
           pages: input.pages,
         });
 
-        validateOutputPath(input.outputPath, ".json");
         await writeFile(input.outputPath, result.result);
 
         return makeSuccessResponse(`Successfully converted PDF to JSON.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
