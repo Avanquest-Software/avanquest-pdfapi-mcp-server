@@ -80,7 +80,7 @@ export function createMcpServer() {
       title: "Convert PDF to Word",
       description:
         "Converts a PDF file to Microsoft Word format (.docx). Extracts text and images while preserving " +
-        "formatting as closely as possible. Maximum file size: 10MB. Saves the converted Word document " +
+        "formatting as closely as possible. Maximum file size: 100MB. Saves the converted Word document " +
         "to the specified output path.",
       inputSchema: schemas.PdfConvertToWordSchema.shape,
       annotations: { destructiveHint: true },
@@ -115,7 +115,7 @@ export function createMcpServer() {
       title: "Convert PDF to PowerPoint",
       description:
         "Converts a PDF file to Microsoft PowerPoint format (.pptx). Each PDF page becomes a slide with " +
-        "text and images preserved. Maximum file size: 10MB. Saves the converted PowerPoint presentation " +
+        "text and images preserved. Maximum file size: 100MB. Saves the converted PowerPoint presentation " +
         "to the specified output path.",
       inputSchema: schemas.PdfConvertToPowerPointSchema.shape,
       annotations: { destructiveHint: true },
@@ -155,7 +155,7 @@ export function createMcpServer() {
       description:
         "Converts a PDF file to Microsoft Excel format (.xlsx). Extracts tables and text content into " +
         "spreadsheet format. You can choose how to organize the data: by table, by page, or entire " +
-        "document. Optionally extract only tables. Maximum file size: 10MB. Saves the converted Excel " +
+        "document. Optionally extract only tables. Maximum file size: 100MB. Saves the converted Excel " +
         "workbook to the specified output path.",
       inputSchema: schemas.PdfConvertToExcelSchema.shape,
       annotations: { destructiveHint: true },
@@ -192,7 +192,7 @@ export function createMcpServer() {
       title: "Merge PDF Files",
       description:
         "Merges multiple PDF files into a single PDF document. Requires at least 2 files. You can " +
-        "specify which pages to include from each file and their order. Maximum total size: 10MB. Saves " +
+        "specify which pages to include from each file and their order. Maximum total size: 100MB. Saves " +
         "the merged PDF to the specified output path.",
       inputSchema: schemas.PdfMergeSchema.shape,
       annotations: { destructiveHint: true },
@@ -224,7 +224,7 @@ export function createMcpServer() {
       title: "Compress PDF",
       description:
         "Compresses a PDF file to reduce its size while maintaining quality. Choose from 5 quality " +
-        "levels (min, low, medium, high, max). Maximum file size: 10MB. Saves the compressed PDF to " +
+        "levels (min, low, medium, high, max). Maximum file size: 100MB. Saves the compressed PDF to " +
         "the specified output path.",
       inputSchema: schemas.PdfCompressSchema.shape,
       annotations: { destructiveHint: true },
@@ -260,7 +260,7 @@ export function createMcpServer() {
       title: "Split PDF",
       description:
         "Splits a PDF document into multiple separate PDF files. You can split by specific pages or " +
-        "page ranges. Each output file will be numbered sequentially. Maximum file size: 10MB. Saves a " +
+        "page ranges. Each output file will be numbered sequentially. Maximum file size: 100MB. Saves a " +
         "ZIP archive containing the split PDFs to the specified output path.",
       inputSchema: schemas.PdfSplitSchema.shape,
       annotations: { destructiveHint: true },
@@ -296,7 +296,7 @@ export function createMcpServer() {
       title: "Convert PDF to Text",
       description:
         "Extracts all text from a PDF document and converts it to plain text format. Optionally add " +
-        "page dividers and include text outside page bounds. Maximum file size: 10MB. Saves the text " +
+        "page dividers and include text outside page bounds. Maximum file size: 100MB. Saves the text " +
         "file to the specified output path.",
       inputSchema: schemas.PdfToTextSchema.shape,
       annotations: { destructiveHint: true },
@@ -333,7 +333,7 @@ export function createMcpServer() {
       title: "Delete PDF Pages",
       description:
         "Removes specific pages from a PDF document. Specify which pages to delete using page numbers " +
-        "or ranges. Maximum file size: 10MB. Saves the modified PDF to the specified output path.",
+        "or ranges. Maximum file size: 100MB. Saves the modified PDF to the specified output path.",
       inputSchema: schemas.DeletePdfPagesSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -369,7 +369,7 @@ export function createMcpServer() {
       description:
         "Rotates pages in a PDF document by 90, 180, or 270 degrees clockwise. You can rotate specific " +
         "pages or all pages. Perfect for correcting scanned documents or misaligned pages. Maximum file " +
-        "size: 10MB. Saves the rotated PDF to the specified output path.",
+        "size: 100MB. Saves the rotated PDF to the specified output path.",
       inputSchema: schemas.RotatePdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -405,7 +405,7 @@ export function createMcpServer() {
       description:
         "Converts HTML content to a PDF document. You can provide either an HTML file or a URL. Choose " +
         "from various page formats (singlePage, letter, legal, tabloid, ledger, A0-A6). Maximum file " +
-        "size: 10MB. Saves the converted PDF to the specified output path.",
+        "size: 100MB. Saves the converted PDF to the specified output path.",
       inputSchema: schemas.HtmlToPdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -441,7 +441,7 @@ export function createMcpServer() {
       description:
         "Converts an image file to a PDF document. Supported image formats: JPEG, JPG, BMP, PNG, GIF. " +
         "Perfect for converting scanned documents, photos, or screenshots into PDF format. Maximum file " +
-        "size: 10MB. Saves the converted PDF to the specified output path.",
+        "size: 100MB. Saves the converted PDF to the specified output path.",
       inputSchema: schemas.ImgToPdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -473,7 +473,7 @@ export function createMcpServer() {
       description:
         "Converts a plain text file to a PDF document. Takes a .txt file and transforms it into a " +
         "well-structured, professional PDF. Ideal for creating reports, notes, or documentation from " +
-        "text files. Maximum file size: 10MB. Saves the converted PDF to the specified output path.",
+        "text files. Maximum file size: 100MB. Saves the converted PDF to the specified output path.",
       inputSchema: schemas.TxtToPdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -505,7 +505,7 @@ export function createMcpServer() {
       description:
         "Adds or changes password protection on a PDF document. Secure your PDF files by requiring a " +
         "password to open them. You can set a new password on an unprotected PDF or change the password " +
-        "on an already protected PDF. Maximum file size: 10MB. Saves the password-protected PDF to the " +
+        "on an already protected PDF. Maximum file size: 100MB. Saves the password-protected PDF to the " +
         "specified output path.",
       inputSchema: schemas.PasswordProtectPdfSchema.shape,
       annotations: { destructiveHint: true },
@@ -542,7 +542,7 @@ export function createMcpServer() {
       description:
         "Removes password protection from a PDF document. Unlock a password-protected PDF by providing " +
         "the correct password, allowing full access to its contents for viewing, editing, or printing. " +
-        "Maximum file size: 10MB. Saves the unlocked PDF to the specified output path.",
+        "Maximum file size: 100MB. Saves the unlocked PDF to the specified output path.",
       inputSchema: schemas.UnlockPdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -574,7 +574,7 @@ export function createMcpServer() {
       description:
         "Resizes PDF pages to specified dimensions in inches. You can adjust width and height " +
         "independently (range: 0.1 to 200 inches). Apply to specific pages or all pages. Perfect for " +
-        "standardizing document sizes or preparing PDFs for printing. Maximum file size: 10MB. Saves " +
+        "standardizing document sizes or preparing PDFs for printing. Maximum file size: 100MB. Saves " +
         "the resized PDF to the specified output path.",
       inputSchema: schemas.ResizePdfSchema.shape,
       annotations: { destructiveHint: true },
@@ -612,7 +612,7 @@ export function createMcpServer() {
       description:
         "Converts PDF content to structured JSON format. Extracts text and metadata from the PDF and " +
         "organizes it into a machine-readable JSON file. Perfect for data extraction, content indexing, " +
-        "and integration with APIs. Maximum file size: 10MB. Saves the JSON file to the specified " +
+        "and integration with APIs. Maximum file size: 100MB. Saves the JSON file to the specified " +
         "output path.",
       inputSchema: schemas.PdfToJsonSchema.shape,
       annotations: { destructiveHint: true },
@@ -650,7 +650,7 @@ export function createMcpServer() {
         "bold, italic options) or an image/PDF file as the watermark. Control placement, rotation " +
         "(0, 45, 90, 270, 315 degrees), opacity (0-1), position (center, corners, sides), and whether " +
         "it appears behind or above content. Perfect for branding, security, or marking documents as " +
-        "confidential. Maximum file size: 10MB. Saves the watermarked PDF to the specified output path.",
+        "confidential. Maximum file size: 100MB. Saves the watermarked PDF to the specified output path.",
       inputSchema: schemas.AddWatermarkToPdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -712,7 +712,7 @@ export function createMcpServer() {
         " - 'image-for-ocr' - The document has raster images suitable for OCR (width > 50 and height > 50)\n" +
         " - 'maybe-scanned' - The document only contains raster images that cover > 95% of a page " +
         "and doesn't contain other objects or text\n" +
-        "Maximum PDF file size: 10MB.",
+        "Maximum file size: 100MB.",
       inputSchema: schemas.PdfAnalyzeTagSchema.shape,
       annotations: { readOnlyHint: true, }
     },
