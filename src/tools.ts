@@ -16,7 +16,8 @@ export const PdfConvertToWordSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Pages to convert. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to convert all pages"
+      "Pages to convert. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to convert all pages"
     ),
 });
 
@@ -32,7 +33,8 @@ export const PdfConvertToPowerPointSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Pages to convert. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to convert all pages"
+      "Pages to convert. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to convert all pages"
     ),
 });
 
@@ -48,13 +50,16 @@ export const PdfConvertToExcelSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Pages to convert. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to convert all pages"
+      "Pages to convert. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to convert all pages"
     ),
   convertPdfToExcelType: z
     .enum(["tablePerSheet", "pagePerSheet", "documentPerSheet"])
     .optional()
     .describe(
-      "Excel conversion mode: 'tablePerSheet' places each table on separate sheets, 'pagePerSheet' places each page on separate sheets, 'documentPerSheet' places entire document on one sheet. Default is tablePerSheet"
+      "Excel conversion mode: 'tablePerSheet' places each table on separate sheets, 'pagePerSheet' " +
+      "places each page on separate sheets, 'documentPerSheet' places entire document on one sheet. " +
+      "Default is tablePerSheet"
     ),
   keepTablesOnly: z
     .boolean()
@@ -79,7 +84,8 @@ export const PdfMergeSchema = z.object({
           .string()
           .optional()
           .describe(
-            "Pages to include from this file. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to include all pages"
+            "Pages to include from this file. Specify page numbers separated by commas (e.g., '1,3,5') " +
+            "or ranges with dashes (e.g., '3-7'). Leave empty to include all pages"
           ),
       })
     )
@@ -99,7 +105,8 @@ export const PdfCompressSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Pages to compress. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to compress all pages"
+      "Pages to compress. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to compress all pages"
     ),
   quality: z
     .enum(["min", "low", "medium", "high", "max"])
@@ -121,14 +128,16 @@ export const PdfSplitSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Pages to split. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to split each page into a separate file"
+      "Pages to split. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to split each page into a separate file"
     ),
   labelStart: z
     .number()
     .int()
     .optional()
     .describe(
-      "Starting number for labeling output files. Files will be named '{originalName}.pdf - {labelNumber}'. Default is 0"
+      "Starting number for labeling output files. Files will be named '{originalName}.pdf - " +
+      "{labelNumber}'. Default is 0"
     ),
 });
 
@@ -144,13 +153,15 @@ export const PdfToTextSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Pages to convert. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to convert all pages"
+      "Pages to convert. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to convert all pages"
     ),
   divider: z
     .string()
     .optional()
     .describe(
-      "Page divider to insert between pages. Can be a custom string (e.g., '---') or format string like '%1%' for page numbers, '%1% of %2%' for 'page X of total' format"
+      "Page divider to insert between pages. Can be a custom string (e.g., '---') or format string " +
+      "like '%1%' for page numbers, '%1% of %2%' for 'page X of total' format"
     ),
   convertCropped: z
     .boolean()
@@ -187,7 +198,8 @@ export const RotatePdfSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Pages to rotate. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to rotate all pages"
+      "Pages to rotate. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to rotate all pages"
     ),
   rotateDegrees: z
     .enum(["90", "180", "270"])
@@ -227,7 +239,8 @@ export const HtmlToPdfSchema = z.object({
     ])
     .optional()
     .describe(
-      "Format of the PDF document. Available formats: singlePage, letter, legal, tabloid, ledger, a0, a1, a2, a3, a4, a5, a6. Default is singlePage"
+      "Format of the PDF document. Available formats: singlePage, letter, legal, tabloid, ledger, " +
+      "a0, a1, a2, a3, a4, a5, a6. Default is singlePage"
     ),
 });
 
@@ -279,7 +292,8 @@ export const ResizePdfSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Pages to resize. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to resize all pages"
+      "Pages to resize. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to resize all pages"
     ),
   width: z
     .number()
@@ -311,7 +325,8 @@ export const PdfToJsonSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Pages to convert. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to convert all pages"
+      "Pages to convert. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to convert all pages"
     ),
 });
 
@@ -327,7 +342,8 @@ export const AddWatermarkToPdfSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Pages to add watermark to. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to add watermark to all pages"
+      "Pages to add watermark to. Specify page numbers separated by commas (e.g., '1,3,5') or ranges " +
+      "with dashes (e.g., '3-7'). Leave empty to add watermark to all pages"
     ),
   text: z
     .string()
@@ -358,7 +374,8 @@ export const AddWatermarkToPdfSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Path to source file to use as watermark (PDF, JPG, JPEG, BMP, PNG, GIF, WWF, TIF, TIFF). Either text or sourceFilePath must be provided"
+      "Path to source file to use as watermark (PDF, JPG, JPEG, BMP, PNG, GIF, WWF, TIF, TIFF). " +
+      "Either text or sourceFilePath must be provided"
     ),
   sourceFilePassword: z
     .string()
@@ -422,6 +439,7 @@ export const PdfAnalyzeTagSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Pages to analyze. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with dashes (e.g., '3-7'). Leave empty to analyze all pages"
+      "Pages to analyze. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to analyze all pages"
     ),
 });

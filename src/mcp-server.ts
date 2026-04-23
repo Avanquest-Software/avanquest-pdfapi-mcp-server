@@ -79,7 +79,9 @@ export function createMcpServer() {
     {
       title: "Convert PDF to Word",
       description:
-        "Converts a PDF file to Microsoft Word format (.docx). Extracts text and images while preserving formatting as closely as possible. Maximum file size: 10MB. Saves the converted Word document to the specified output path.",
+        "Converts a PDF file to Microsoft Word format (.docx). Extracts text and images while preserving " +
+        "formatting as closely as possible. Maximum file size: 10MB. Saves the converted Word document " +
+        "to the specified output path.",
       inputSchema: schemas.PdfConvertToWordSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -94,7 +96,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully converted PDF to Word format.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully converted PDF to Word format.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -107,7 +114,9 @@ export function createMcpServer() {
     {
       title: "Convert PDF to PowerPoint",
       description:
-        "Converts a PDF file to Microsoft PowerPoint format (.pptx). Each PDF page becomes a slide with text and images preserved. Maximum file size: 10MB. Saves the converted PowerPoint presentation to the specified output path.",
+        "Converts a PDF file to Microsoft PowerPoint format (.pptx). Each PDF page becomes a slide with " +
+        "text and images preserved. Maximum file size: 10MB. Saves the converted PowerPoint presentation " +
+        "to the specified output path.",
       inputSchema: schemas.PdfConvertToPowerPointSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -126,7 +135,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully processed file.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -139,7 +153,10 @@ export function createMcpServer() {
     {
       title: "Convert PDF to Excel",
       description:
-        "Converts a PDF file to Microsoft Excel format (.xlsx). Extracts tables and text content into spreadsheet format. You can choose how to organize the data: by table, by page, or entire document. Optionally extract only tables. Maximum file size: 10MB. Saves the converted Excel workbook to the specified output path.",
+        "Converts a PDF file to Microsoft Excel format (.xlsx). Extracts tables and text content into " +
+        "spreadsheet format. You can choose how to organize the data: by table, by page, or entire " +
+        "document. Optionally extract only tables. Maximum file size: 10MB. Saves the converted Excel " +
+        "workbook to the specified output path.",
       inputSchema: schemas.PdfConvertToExcelSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -156,7 +173,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully processed file.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -169,7 +191,9 @@ export function createMcpServer() {
     {
       title: "Merge PDF Files",
       description:
-        "Merges multiple PDF files into a single PDF document. Requires at least 2 files. You can specify which pages to include from each file and their order. Maximum total size: 10MB. Saves the merged PDF to the specified output path.",
+        "Merges multiple PDF files into a single PDF document. Requires at least 2 files. You can " +
+        "specify which pages to include from each file and their order. Maximum total size: 10MB. Saves " +
+        "the merged PDF to the specified output path.",
       inputSchema: schemas.PdfMergeSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -181,7 +205,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully processed file.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -194,7 +223,9 @@ export function createMcpServer() {
     {
       title: "Compress PDF",
       description:
-        "Compresses a PDF file to reduce its size while maintaining quality. Choose from 5 quality levels (min, low, medium, high, max). Maximum file size: 10MB. Saves the compressed PDF to the specified output path.",
+        "Compresses a PDF file to reduce its size while maintaining quality. Choose from 5 quality " +
+        "levels (min, low, medium, high, max). Maximum file size: 10MB. Saves the compressed PDF to " +
+        "the specified output path.",
       inputSchema: schemas.PdfCompressSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -210,7 +241,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully processed file.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -223,7 +259,9 @@ export function createMcpServer() {
     {
       title: "Split PDF",
       description:
-        "Splits a PDF document into multiple separate PDF files. You can split by specific pages or page ranges. Each output file will be numbered sequentially. Maximum file size: 10MB. Saves a ZIP archive containing the split PDFs to the specified output path.",
+        "Splits a PDF document into multiple separate PDF files. You can split by specific pages or " +
+        "page ranges. Each output file will be numbered sequentially. Maximum file size: 10MB. Saves a " +
+        "ZIP archive containing the split PDFs to the specified output path.",
       inputSchema: schemas.PdfSplitSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -239,7 +277,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully processed file.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -252,7 +295,9 @@ export function createMcpServer() {
     {
       title: "Convert PDF to Text",
       description:
-        "Extracts all text from a PDF document and converts it to plain text format. Optionally add page dividers and include text outside page bounds. Maximum file size: 10MB. Saves the text file to the specified output path.",
+        "Extracts all text from a PDF document and converts it to plain text format. Optionally add " +
+        "page dividers and include text outside page bounds. Maximum file size: 10MB. Saves the text " +
+        "file to the specified output path.",
       inputSchema: schemas.PdfToTextSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -269,7 +314,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully processed file.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -282,7 +332,8 @@ export function createMcpServer() {
     {
       title: "Delete PDF Pages",
       description:
-        "Removes specific pages from a PDF document. Specify which pages to delete using page numbers or ranges. Maximum file size: 10MB. Saves the modified PDF to the specified output path.",
+        "Removes specific pages from a PDF document. Specify which pages to delete using page numbers " +
+        "or ranges. Maximum file size: 10MB. Saves the modified PDF to the specified output path.",
       inputSchema: schemas.DeletePdfPagesSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -298,7 +349,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully processed file.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -311,7 +367,9 @@ export function createMcpServer() {
     {
       title: "Rotate PDF Pages",
       description:
-        "Rotates pages in a PDF document by 90, 180, or 270 degrees clockwise. You can rotate specific pages or all pages. Perfect for correcting scanned documents or misaligned pages. Maximum file size: 10MB. Saves the rotated PDF to the specified output path.",
+        "Rotates pages in a PDF document by 90, 180, or 270 degrees clockwise. You can rotate specific " +
+        "pages or all pages. Perfect for correcting scanned documents or misaligned pages. Maximum file " +
+        "size: 10MB. Saves the rotated PDF to the specified output path.",
       inputSchema: schemas.RotatePdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -327,7 +385,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully processed file.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully processed file.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -340,7 +403,9 @@ export function createMcpServer() {
     {
       title: "Convert HTML to PDF",
       description:
-        "Converts HTML content to a PDF document. You can provide either an HTML file or a URL. Choose from various page formats (singlePage, letter, legal, tabloid, ledger, A0-A6). Maximum file size: 10MB. Saves the converted PDF to the specified output path.",
+        "Converts HTML content to a PDF document. You can provide either an HTML file or a URL. Choose " +
+        "from various page formats (singlePage, letter, legal, tabloid, ledger, A0-A6). Maximum file " +
+        "size: 10MB. Saves the converted PDF to the specified output path.",
       inputSchema: schemas.HtmlToPdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -356,7 +421,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully converted HTML to PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully converted HTML to PDF.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -369,7 +439,9 @@ export function createMcpServer() {
     {
       title: "Convert Image to PDF",
       description:
-        "Converts an image file to a PDF document. Supported image formats: JPEG, JPG, BMP, PNG, GIF. Perfect for converting scanned documents, photos, or screenshots into PDF format. Maximum file size: 10MB. Saves the converted PDF to the specified output path.",
+        "Converts an image file to a PDF document. Supported image formats: JPEG, JPG, BMP, PNG, GIF. " +
+        "Perfect for converting scanned documents, photos, or screenshots into PDF format. Maximum file " +
+        "size: 10MB. Saves the converted PDF to the specified output path.",
       inputSchema: schemas.ImgToPdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -381,7 +453,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully converted image to PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully converted image to PDF.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -394,7 +471,9 @@ export function createMcpServer() {
     {
       title: "Convert Text to PDF",
       description:
-        "Converts a plain text file to a PDF document. Takes a .txt file and transforms it into a well-structured, professional PDF. Ideal for creating reports, notes, or documentation from text files. Maximum file size: 10MB. Saves the converted PDF to the specified output path.",
+        "Converts a plain text file to a PDF document. Takes a .txt file and transforms it into a " +
+        "well-structured, professional PDF. Ideal for creating reports, notes, or documentation from " +
+        "text files. Maximum file size: 10MB. Saves the converted PDF to the specified output path.",
       inputSchema: schemas.TxtToPdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -406,7 +485,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully converted text file to PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully converted text file to PDF.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -419,7 +503,10 @@ export function createMcpServer() {
     {
       title: "Password Protect PDF",
       description:
-        "Adds or changes password protection on a PDF document. Secure your PDF files by requiring a password to open them. You can set a new password on an unprotected PDF or change the password on an already protected PDF. Maximum file size: 10MB. Saves the password-protected PDF to the specified output path.",
+        "Adds or changes password protection on a PDF document. Secure your PDF files by requiring a " +
+        "password to open them. You can set a new password on an unprotected PDF or change the password " +
+        "on an already protected PDF. Maximum file size: 10MB. Saves the password-protected PDF to the " +
+        "specified output path.",
       inputSchema: schemas.PasswordProtectPdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -435,7 +522,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully password-protected PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully password-protected PDF.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -448,7 +540,9 @@ export function createMcpServer() {
     {
       title: "Unlock PDF",
       description:
-        "Removes password protection from a PDF document. Unlock a password-protected PDF by providing the correct password, allowing full access to its contents for viewing, editing, or printing. Maximum file size: 10MB. Saves the unlocked PDF to the specified output path.",
+        "Removes password protection from a PDF document. Unlock a password-protected PDF by providing " +
+        "the correct password, allowing full access to its contents for viewing, editing, or printing. " +
+        "Maximum file size: 10MB. Saves the unlocked PDF to the specified output path.",
       inputSchema: schemas.UnlockPdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -460,7 +554,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully unlocked PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully unlocked PDF.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -473,7 +572,10 @@ export function createMcpServer() {
     {
       title: "Resize PDF Pages",
       description:
-        "Resizes PDF pages to specified dimensions in inches. You can adjust width and height independently (range: 0.1 to 200 inches). Apply to specific pages or all pages. Perfect for standardizing document sizes or preparing PDFs for printing. Maximum file size: 10MB. Saves the resized PDF to the specified output path.",
+        "Resizes PDF pages to specified dimensions in inches. You can adjust width and height " +
+        "independently (range: 0.1 to 200 inches). Apply to specific pages or all pages. Perfect for " +
+        "standardizing document sizes or preparing PDFs for printing. Maximum file size: 10MB. Saves " +
+        "the resized PDF to the specified output path.",
       inputSchema: schemas.ResizePdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -490,7 +592,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully resized PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully resized PDF.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -503,7 +610,10 @@ export function createMcpServer() {
     {
       title: "Convert PDF to JSON",
       description:
-        "Converts PDF content to structured JSON format. Extracts text and metadata from the PDF and organizes it into a machine-readable JSON file. Perfect for data extraction, content indexing, and integration with APIs. Maximum file size: 10MB. Saves the JSON file to the specified output path.",
+        "Converts PDF content to structured JSON format. Extracts text and metadata from the PDF and " +
+        "organizes it into a machine-readable JSON file. Perfect for data extraction, content indexing, " +
+        "and integration with APIs. Maximum file size: 10MB. Saves the JSON file to the specified " +
+        "output path.",
       inputSchema: schemas.PdfToJsonSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -518,7 +628,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully converted PDF to JSON.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully converted PDF to JSON.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -531,7 +646,11 @@ export function createMcpServer() {
     {
       title: "Add Watermark to PDF",
       description:
-        "Adds a customizable watermark to PDF documents. You can use text (with font, size, color, bold, italic options) or an image/PDF file as the watermark. Control placement, rotation (0, 45, 90, 270, 315 degrees), opacity (0-1), position (center, corners, sides), and whether it appears behind or above content. Perfect for branding, security, or marking documents as confidential. Maximum file size: 10MB. Saves the watermarked PDF to the specified output path.",
+        "Adds a customizable watermark to PDF documents. You can use text (with font, size, color, " +
+        "bold, italic options) or an image/PDF file as the watermark. Control placement, rotation " +
+        "(0, 45, 90, 270, 315 degrees), opacity (0-1), position (center, corners, sides), and whether " +
+        "it appears behind or above content. Perfect for branding, security, or marking documents as " +
+        "confidential. Maximum file size: 10MB. Saves the watermarked PDF to the specified output path.",
       inputSchema: schemas.AddWatermarkToPdfSchema.shape,
       annotations: { destructiveHint: true },
     },
@@ -560,7 +679,12 @@ export function createMcpServer() {
 
         await writeFile(input.outputPath, result.result);
 
-        return makeSuccessResponse(`Successfully added watermark to PDF.\n\nOperation ID: ${result.operationId}\nOutput file: ${input.outputPath}\nFile size: ${result.result.length} bytes`);
+        return makeSuccessResponse(
+          `Successfully added watermark to PDF.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output file: ${input.outputPath}\n` +
+          `File size: ${result.result.length} bytes`
+        );
       } catch (error: unknown) {
         return makeErrorResponse(error);
       }
@@ -580,12 +704,14 @@ export function createMcpServer() {
         " - 'attachment' - The document has File attachments\n" +
         " - 'optional-content' - The document has OCGroups (Layers in terms of Soda PDF)\n" +
         " - 'signed' - The document has a signed Sig field with valid integrity\n" +
-        " - 'comments' - The document has Markup annotations (the ones that have popup on double-click in Soda PDF)\n" +
+        " - 'comments' - The document has Markup annotations (the ones that have popup on " +
+        "double-click in Soda PDF)\n" +
         " - 'text' - The document has text in page content\n" +
         " - 'image' - The document has raster images in page content\n" +
         " - 'vector-image' - The document has vector images in page content\n" +
         " - 'image-for-ocr' - The document has raster images suitable for OCR (width > 50 and height > 50)\n" +
-        " - 'maybe-scanned' - The document only contains raster images that cover > 95% of a page and doesn't contain other objects or text\n" +
+        " - 'maybe-scanned' - The document only contains raster images that cover > 95% of a page " +
+        "and doesn't contain other objects or text\n" +
         "Maximum PDF file size: 10MB.",
       inputSchema: schemas.PdfAnalyzeTagSchema.shape,
       annotations: { readOnlyHint: true, }
