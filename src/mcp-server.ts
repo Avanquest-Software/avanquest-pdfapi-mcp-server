@@ -731,6 +731,40 @@ export function createMcpServer() {
     }
   );
 
+  // Register pdf_document_extract tool
+  server.registerTool(
+    "pdf_document_extract",
+    {
+      title: "Extract data from a PDF or image file",
+      description:
+        "Extracts structured data from a PDF or image file and returns the result as a Markdown document. " +
+        "Supported input formats: pdf, jpg, jpeg, png, tiff, bmp, gif, heic, webp. " +
+        "Maximum file size: 100MB.",
+      inputSchema: schemas.DocumentExtractSchema.shape,
+      annotations: { destructiveHint: true },
+    },
+    async (params: z.infer<typeof schemas.DocumentExtractSchema>) => {
+      try {
+        const input = schemas.DocumentExtractSchema.parse(params);
+        validateOutputPath(input.outputPath, ".md");
+        const result = await apiClient.documentExtract(input.filePath, {
+          password: input.password,
+          pages: input.pages,
+        });
+
+        await writeFile(input.outputPath, result.result);
+
+        return makeSuccessResponse(
+          `Successfully extracted data from the file.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output saved to: ${input.outputPath}`
+        );
+      } catch (error: unknown) {
+        return makeErrorResponse(error);
+      }
+    }
+  );
+
   // Register pdf_ocr tool
   server.registerTool(
     "pdf_ocr",

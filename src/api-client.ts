@@ -248,6 +248,11 @@ export interface OcrPdfOptions {
   deskew?: boolean;
 }
 
+export interface DocumentExtractOptions {
+  password?: string;
+  pages?: string;
+}
+
 // Allowed input extensions, kept here so the source of truth is in one place
 const PDF_EXTS: readonly string[] = [".pdf"];
 const IMAGE_EXTS: readonly string[] = [".jpg", ".jpeg", ".bmp", ".png", ".gif"];
@@ -941,7 +946,6 @@ export class AvanquestPdfApiClient {
   }
 
   /**
-  /**
    * Performs OCR on a PDF or image file, returning extracted text
    */
   async ocrPdf(
@@ -959,6 +963,28 @@ export class AvanquestPdfApiClient {
       formData.append("deskew", String(options.deskew));
 
     const operation = await this.uploadFile("/ocr/v1", formData);
+    await this.pollOperationUntilComplete(operation.id);
+    const result = await this.downloadOperationResult(operation.id);
+
+    return { operationId: operation.id, result };
+  }
+
+  /**
+   * Extracts structured data from a PDF or image file, returning a Markdown document
+   */
+  async documentExtract(
+    filePath: string,
+    options: DocumentExtractOptions = {}
+  ): Promise<{ operationId: string; result: Buffer }> {
+    await this.validateFilePath(filePath, OCR_EXTS);
+
+    const formData = new FormData();
+    await this.appendFileToForm(formData, "file", filePath);
+
+    if (options.password) formData.append("password", options.password);
+    if (options.pages) formData.append("pages", options.pages);
+
+    const operation = await this.uploadFile("/document-extract/v1", formData);
     await this.pollOperationUntilComplete(operation.id);
     const result = await this.downloadOperationResult(operation.id);
 
