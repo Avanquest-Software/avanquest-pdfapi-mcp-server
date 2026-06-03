@@ -525,11 +525,17 @@ export const SignPdfBaseSchema = z.object({
   signType: z
     .enum(["signature", "certificate", "both"])
     .describe(
-      "Type of signing to apply:\n" +
-      "  'signature' — place one or more signature images on the PDF. Requires: signaturePaths + signaturePositions.\n" +
-      "  'certificate' — place a certificate image (visual stamp) on the PDF. Requires: certificatePath + certificatePosition.\n" +
-      "  'both' — apply both a certificate stamp AND signature images. Requires all four fields above.\n" +
-      "Always ask the user which type they want before calling this tool."
+      "Signing mode — determines which visual elements are added to the PDF:\n" +
+      "  'signature' — approval-style signing: places one or more handwritten/image signatures on the document " +
+      "(equivalent to physically signing a form or adding an approval stamp). " +
+      "Multiple signers can each add their own signature. " +
+      "Requires: signaturePaths + signaturePositions.\n" +
+      "  'certificate' — certifying-style signing: places a single visual authority stamp (company seal, notary stamp, " +
+      "or issuer certificate image) — typically done once by the document author before others sign. " +
+      "Requires: certificatePath + certificatePosition.\n" +
+      "  'both' — add a certificate stamp AND one or more approval signatures in one operation. " +
+      "Requires all four fields: certificatePath, certificatePosition, signaturePaths, signaturePositions.\n" +
+      "Ask the user which type they need if it is not clear from context."
     ),
   password: z
     .string()
