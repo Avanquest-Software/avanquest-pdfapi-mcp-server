@@ -841,16 +841,24 @@ export function createMcpServer() {
   server.registerTool(
     "sign_pdf",
     {
-      title: "Sign a PDF file with certificate and/or signature images",
+      title: "Sign a PDF file with visual signature and/or certificate stamp images",
       description:
-        "Signs a PDF file using the Sign PDF v2 API. " +
-        "Supports three signing modes (signType): " +
-        "'signature' — place signature images at specified positions; " +
-        "'certificate' — place a visual certificate stamp; " +
-        "'both' — apply both. " +
-        "Always ask the user which signType they want before calling this tool. " +
-        "All image files must be jpeg, jpg, bmp, png, or gif. " +
-        "Position JSON strings must use double quotes. Maximum input file size: 100MB.",
+        "Adds visual signature images and/or a visual certificate stamp to a PDF file. " +
+        "IMPORTANT: This tool applies VISUAL (image-based) stamps only — it does NOT apply cryptographic digital signatures " +
+        "(the kind that require a PKI certificate, private key, or produce a tamper-evident seal). " +
+        "Use this tool when the user wants to: visually sign a document with their handwritten signature image; " +
+        "add an approval signature image (like signing a paper form); place a company seal or certificate stamp on the document; " +
+        "fill existing signature placeholder fields with a signature image. " +
+        "Do NOT use this tool if the user explicitly asks for cryptographic signing, PKI, X.509, or digital certificates — " +
+        "explain that this API adds visual stamps only. " +
+        "Signing modes (signType): " +
+        "'signature' — approval-style: place one or more handwritten/image signatures on the page (like physically signing a form). " +
+        "  Requires: signaturePaths (image files) + signaturePositions (where to place them). " +
+        "'certificate' — certifying-style: place a single visual certificate/authority stamp on the document (like a notary seal or company stamp). " +
+        "  Requires: certificatePath (image file) + certificatePosition (where to place it). " +
+        "'both' — apply a certificate stamp AND one or more signature images simultaneously. " +
+        "Always ask the user which type they need if not clear from context. " +
+        "All image files must be jpeg, jpg, bmp, png, or gif. Maximum input file size: 100MB.",
       inputSchema: schemas.SignPdfBaseSchema.shape,
       annotations: { destructiveHint: true },
     },
