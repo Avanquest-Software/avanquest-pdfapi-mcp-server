@@ -837,5 +837,87 @@ export function createMcpServer() {
     }
   );
 
+  // Register sign_pdf tool
+  server.registerTool(
+    "sign_pdf",
+    {
+      title: "Sign a PDF file with certificate and/or signature images",
+      description:
+        "Signs a PDF file using the Sign PDF v2 API. Supports adding a visual certificate image and/or " +
+        "one or more signature images at specified positions. Certificate and signature images must be " +
+        "jpeg, jpg, bmp, png, or gif files. " +
+        "certificatePosition and signaturePositions must be valid JSON strings with double quotes. " +
+        "Output is a signed PDF file. Maximum input file size: 100MB.",
+      inputSchema: schemas.SignPdfSchema.shape,
+      annotations: { destructiveHint: true },
+    },
+    async (params: z.infer<typeof schemas.SignPdfSchema>) => {
+      try {
+        const input = schemas.SignPdfSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
+        const result = await apiClient.signPdf(input.filePath, {
+          password: input.password,
+          pages: input.pages,
+          certificatePath: input.certificatePath,
+          certificatePosition: input.certificatePosition,
+          signaturePaths: input.signaturePaths,
+          signaturePositions: input.signaturePositions,
+          ownerPassword: input.ownerPassword,
+        });
+
+        await writeFile(input.outputPath, result.result);
+
+        return makeSuccessResponse(
+          `Successfully signed the PDF.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output saved to: ${input.outputPath}`
+        );
+      } catch (error: unknown) {
+        return makeErrorResponse(error);
+      }
+    }
+  );
+
+  // Register sign_pdf_placeholder tool
+  server.registerTool(
+    "sign_pdf_placeholder",
+    {
+      title: "Add empty signature placeholder fields to a PDF file",
+      description:
+        "Creates empty signature placeholder fields in a PDF file using the Sign PDF v2 placeholder API. " +
+        "Useful for multi-step workflows: first create placeholders (step 1), then sign each field " +
+        "using sign_pdf with signerFieldId (steps 2+). " +
+        "positions must be a valid JSON array string with double quotes. " +
+        "Output is a PDF with empty signature widgets. Maximum input file size: 100MB.",
+      inputSchema: schemas.SignPdfPlaceholderSchema.shape,
+      annotations: { destructiveHint: true },
+    },
+    async (params: z.infer<typeof schemas.SignPdfPlaceholderSchema>) => {
+      try {
+        const input = schemas.SignPdfPlaceholderSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
+        const result = await apiClient.signPdfPlaceholder(
+          input.filePath,
+          input.positions,
+          {
+            password: input.password,
+            pages: input.pages,
+            ownerPassword: input.ownerPassword,
+          }
+        );
+
+        await writeFile(input.outputPath, result.result);
+
+        return makeSuccessResponse(
+          `Successfully added signature placeholders to the PDF.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output saved to: ${input.outputPath}`
+        );
+      } catch (error: unknown) {
+        return makeErrorResponse(error);
+      }
+    }
+  );
+
   return server;
 }
