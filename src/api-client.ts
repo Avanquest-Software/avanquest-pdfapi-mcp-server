@@ -253,6 +253,12 @@ export interface DocumentExtractOptions {
   pages?: string;
 }
 
+export interface PdfInsightOptions {
+  password?: string;
+  pages?: string;
+  modelType?: "external" | "internal";
+}
+
 // Allowed input extensions, kept here so the source of truth is in one place
 const PDF_EXTS: readonly string[] = [".pdf"];
 const IMAGE_EXTS: readonly string[] = [".jpg", ".jpeg", ".bmp", ".png", ".gif"];
@@ -985,6 +991,29 @@ export class AvanquestPdfApiClient {
     if (options.pages) formData.append("pages", options.pages);
 
     const operation = await this.uploadFile("/document-extract/v1", formData);
+    await this.pollOperationUntilComplete(operation.id);
+    const result = await this.downloadOperationResult(operation.id);
+
+    return { operationId: operation.id, result };
+  }
+
+  /**
+   * Extracts AI-powered insights from a PDF document (category, type, keywords, tone, etc.)
+   */
+  async pdfInsight(
+    filePath: string,
+    options: PdfInsightOptions = {}
+  ): Promise<{ operationId: string; result: Buffer }> {
+    await this.validateFilePath(filePath, PDF_EXTS);
+
+    const formData = new FormData();
+    await this.appendFileToForm(formData, "file", filePath);
+
+    if (options.password) formData.append("password", options.password);
+    if (options.pages) formData.append("pages", options.pages);
+    if (options.modelType) formData.append("modelType", options.modelType);
+
+    const operation = await this.uploadFile("/pdf-insights/v1", formData);
     await this.pollOperationUntilComplete(operation.id);
     const result = await this.downloadOperationResult(operation.id);
 

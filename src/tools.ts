@@ -480,6 +480,27 @@ export const OcrPdfSchema = z.object({
     .describe("Apply deskew correction to the image before OCR. Default is false"),
 });
 
+// Zod schema for PDF Insight tool
+export const PdfInsightSchema = z.object({
+  filePath: z.string().describe("Path to the PDF file to analyze. Supported format: pdf. Maximum file size: 100MB"),
+  outputPath: z.string().describe("Path where the extracted insights JSON file should be saved (.json)"),
+  password: z
+    .string()
+    .optional()
+    .describe("Password to open the PDF file (if password-protected)"),
+  pages: z
+    .string()
+    .optional()
+    .describe(
+      "Pages to process. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to process all pages"
+    ),
+  modelType: z
+    .enum(["external", "internal"])
+    .optional()
+    .describe("AI model type to use: 'external' or 'internal'. Default is 'internal'"),
+});
+
 // Zod schema for PDF Analyze Tag tool
 export const PdfAnalyzeTagSchema = z.object({
   filePath: z.string().describe("Path to the PDF file to analyze"),

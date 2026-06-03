@@ -731,6 +731,42 @@ export function createMcpServer() {
     }
   );
 
+  // Register pdf_insight tool
+  server.registerTool(
+    "pdf_insight",
+    {
+      title: "PDF Insight",
+      description:
+        "Analyzes a PDF document using AI and extracts structured insights: document type, category, " +
+        "intended audience, keywords, purpose, tone, and whether it contains a signature. " +
+        "Returns a JSON file with all extracted metadata. " +
+        "Supported input format: pdf. Maximum file size: 100MB.",
+      inputSchema: schemas.PdfInsightSchema.shape,
+      annotations: { readOnlyHint: true },
+    },
+    async (params: z.infer<typeof schemas.PdfInsightSchema>) => {
+      try {
+        const input = schemas.PdfInsightSchema.parse(params);
+        validateOutputPath(input.outputPath, ".json");
+        const result = await apiClient.pdfInsight(input.filePath, {
+          password: input.password,
+          pages: input.pages,
+          modelType: input.modelType,
+        });
+
+        await writeFile(input.outputPath, result.result);
+
+        return makeSuccessResponse(
+          `Successfully extracted insights from PDF.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output saved to: ${input.outputPath}`
+        );
+      } catch (error: unknown) {
+        return makeErrorResponse(error);
+      }
+    }
+  );
+
   // Register pdf_document_extract tool
   server.registerTool(
     "pdf_document_extract",
