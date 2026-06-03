@@ -428,6 +428,34 @@ export const AddWatermarkToPdfSchema = z.object({
     ),
 });
 
+// Zod schema for OCR tool
+export const OcrPdfSchema = z.object({
+  filePath: z
+    .string()
+    .describe(
+      "Path to the file to perform OCR on. Supported formats: pdf, jpg, jpeg, png, tiff, tif, bmp, gif, heic, webp. " +
+      "Maximum file size: 100MB"
+    ),
+  outputPath: z
+    .string()
+    .describe("Path where the OCR result PDF should be saved (.pdf)"),
+  password: z
+    .string()
+    .optional()
+    .describe("Password to open the PDF file (if password-protected)"),
+  pages: z
+    .string()
+    .optional()
+    .describe(
+      "Pages to process. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to process all pages"
+    ),
+  deskew: z
+    .boolean()
+    .optional()
+    .describe("Apply deskew correction to the image before OCR. Default is false"),
+});
+
 // Zod schema for PDF Analyze Tag tool
 export const PdfAnalyzeTagSchema = z.object({
   filePath: z.string().describe("Path to the PDF file to analyze"),

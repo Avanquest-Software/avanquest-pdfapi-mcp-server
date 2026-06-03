@@ -242,9 +242,18 @@ export interface AddWatermarkToPdfOptions {
   isBehind?: boolean;
 }
 
+export interface OcrPdfOptions {
+  password?: string;
+  pages?: string;
+  deskew?: boolean;
+}
+
 // Allowed input extensions, kept here so the source of truth is in one place
 const PDF_EXTS: readonly string[] = [".pdf"];
 const IMAGE_EXTS: readonly string[] = [".jpg", ".jpeg", ".bmp", ".png", ".gif"];
+const OCR_EXTS: readonly string[] = [
+  ".pdf", ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".bmp", ".gif", ".heic", ".webp",
+];
 const HTML_EXTS: readonly string[] = [".html", ".htm"];
 const TEXT_EXTS: readonly string[] = [".txt"];
 const WATERMARK_SOURCE_EXTS: readonly string[] = [
@@ -925,6 +934,31 @@ export class AvanquestPdfApiClient {
       formData.append("isBehind", String(options.isBehind));
 
     const operation = await this.uploadFile("/add-watermark-to-pdf/v1", formData);
+    await this.pollOperationUntilComplete(operation.id);
+    const result = await this.downloadOperationResult(operation.id);
+
+    return { operationId: operation.id, result };
+  }
+
+  /**
+  /**
+   * Performs OCR on a PDF or image file, returning extracted text
+   */
+  async ocrPdf(
+    filePath: string,
+    options: OcrPdfOptions = {}
+  ): Promise<{ operationId: string; result: Buffer }> {
+    await this.validateFilePath(filePath, OCR_EXTS);
+
+    const formData = new FormData();
+    await this.appendFileToForm(formData, "file", filePath);
+
+    if (options.password) formData.append("password", options.password);
+    if (options.pages) formData.append("pages", options.pages);
+    if (options.deskew !== undefined)
+      formData.append("deskew", String(options.deskew));
+
+    const operation = await this.uploadFile("/ocr/v1", formData);
     await this.pollOperationUntilComplete(operation.id);
     const result = await this.downloadOperationResult(operation.id);
 

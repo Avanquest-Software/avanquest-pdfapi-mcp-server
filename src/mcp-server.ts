@@ -731,5 +731,41 @@ export function createMcpServer() {
     }
   );
 
+  // Register pdf_ocr tool
+  server.registerTool(
+    "pdf_ocr",
+    {
+      title: "OCR a PDF or image file",
+      description:
+        "Performs Optical Character Recognition (OCR) on a PDF or image file and returns a searchable PDF " +
+        "with an embedded text layer. Useful for scanned documents and image-based PDFs where text is not selectable. " +
+        "Supported input formats: pdf, jpg, jpeg, png, tiff, bmp, gif, heic, webp. " +
+        "Maximum file size: 100MB.",
+      inputSchema: schemas.OcrPdfSchema.shape,
+      annotations: { destructiveHint: true },
+    },
+    async (params: z.infer<typeof schemas.OcrPdfSchema>) => {
+      try {
+        const input = schemas.OcrPdfSchema.parse(params);
+        validateOutputPath(input.outputPath, ".pdf");
+        const result = await apiClient.ocrPdf(input.filePath, {
+          password: input.password,
+          pages: input.pages,
+          deskew: input.deskew,
+        });
+
+        await writeFile(input.outputPath, result.result);
+
+        return makeSuccessResponse(
+          `Successfully performed OCR on the file.\n\n` +
+          `Operation ID: ${result.operationId}\n` +
+          `Output saved to: ${input.outputPath}`
+        );
+      } catch (error: unknown) {
+        return makeErrorResponse(error);
+      }
+    }
+  );
+
   return server;
 }
