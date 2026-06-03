@@ -518,9 +518,19 @@ export const PdfAnalyzeTagSchema = z.object({
 });
 
 // Zod schema for Sign PDF tool (v2)
-export const SignPdfSchema = z.object({
+// SignPdfBaseSchema is used for inputSchema registration (.shape); SignPdfSchema adds cross-field validation.
+export const SignPdfBaseSchema = z.object({
   filePath: z.string().describe("Path to the PDF file to sign. Supported format: pdf. Maximum file size: 100MB"),
   outputPath: z.string().describe("Path where the signed PDF should be saved (.pdf)"),
+  signType: z
+    .enum(["signature", "certificate", "both"])
+    .describe(
+      "Type of signing to apply:\n" +
+      "  'signature' — place one or more signature images on the PDF. Requires: signaturePaths + signaturePositions.\n" +
+      "  'certificate' — place a certificate image (visual stamp) on the PDF. Requires: certificatePath + certificatePosition.\n" +
+      "  'both' — apply both a certificate stamp AND signature images. Requires all four fields above.\n" +
+      "Always ask the user which type they want before calling this tool."
+    ),
   password: z
     .string()
     .optional()
@@ -536,14 +546,16 @@ export const SignPdfSchema = z.object({
     .string()
     .optional()
     .describe(
-      "Path to the certificate image file to use when signing. Supported image types: jpeg, jpg, bmp, png, gif. " +
-      "This is a visual certificate image, not a cryptographic certificate. Optional — you can sign without it"
+      "Required when signType is 'certificate' or 'both'. " +
+      "Path to the certificate image file (visual stamp). Supported image types: jpeg, jpg, bmp, png, gif. " +
+      "This is a visual image, NOT a cryptographic certificate"
     ),
   certificatePosition: z
     .string()
     .optional()
     .describe(
-      "Certificate position as a SINGLE JSON OBJECT string (NOT an array) — required if certificatePath is provided. " +
+      "Required when signType is 'certificate' or 'both'. " +
+      "Certificate position as a SINGLE JSON OBJECT string (NOT an array). " +
       'Example: {"pageIndex": 0, "left": 50, "top": 50, "width": 200, "height": 80, ' +
       '"reason": "Signed using Sign PDF service", "certifyPermission": "AllowFormFill"}. ' +
       "Fields: pageIndex (zero-based page number), left/top/width/height (position and size in points), " +
@@ -554,6 +566,7 @@ export const SignPdfSchema = z.object({
     .array(z.string())
     .optional()
     .describe(
+      "Required when signType is 'signature' or 'both'. " +
       "Paths to signature image files. Supported image types: jpeg, jpg, bmp, png, gif. " +
       "You can provide multiple signature files — reference them by filename (without extension) " +
       "in signaturePositions via the 'signatureFileName' property"
@@ -562,12 +575,14 @@ export const SignPdfSchema = z.object({
     .string()
     .optional()
     .describe(
+      "Required when signType is 'signature' or 'both'. " +
       "Signature positions as a JSON array string. Two options:\n" +
       "Option 1 — create new fields: " +
       '[{"pageIndex":0,"left":100,"top":200,"width":150,"height":50,"signatureFileName":"mySignature","reason":"Approved"}]\n' +
       "Option 2 — use existing signer field IDs: " +
       '[{"pageIndex":0,"signerFieldId":"Signature1","signatureFileName":"mySignature","reason":"Approved"}]\n' +
-      "IMPORTANT: Use double quotes in JSON, not single quotes"
+      "IMPORTANT: 'signatureFileName' must match the filename (without extension) from signaturePaths. " +
+      "Use double quotes in JSON, not single quotes"
     ),
   ownerPassword: z
     .string()
@@ -577,6 +592,25 @@ export const SignPdfSchema = z.object({
       "Only used if the document does not already have an owner password. " +
       "To open an already-encrypted PDF use the 'password' field instead"
     ),
+});
+
+export const SignPdfSchema = SignPdfBaseSchema.superRefine((data, ctx) => {
+  if (data.signType === "certificate" || data.signType === "both") {
+    if (!data.certificatePath) {
+      ctx.addIssue({ code: "custom", message: "certificatePath is required when signType is 'certificate' or 'both'", path: ["certificatePath"] });
+    }
+    if (!data.certificatePosition) {
+      ctx.addIssue({ code: "custom", message: "certificatePosition is required when signType is 'certificate' or 'both'", path: ["certificatePosition"] });
+    }
+  }
+  if (data.signType === "signature" || data.signType === "both") {
+    if (!data.signaturePaths || data.signaturePaths.length === 0) {
+      ctx.addIssue({ code: "custom", message: "signaturePaths is required when signType is 'signature' or 'both'", path: ["signaturePaths"] });
+    }
+    if (!data.signaturePositions) {
+      ctx.addIssue({ code: "custom", message: "signaturePositions is required when signType is 'signature' or 'both'", path: ["signaturePositions"] });
+    }
+  }
 });
 
 // Zod schema for Sign PDF Placeholder tool (v2)

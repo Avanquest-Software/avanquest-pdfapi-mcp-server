@@ -843,12 +843,15 @@ export function createMcpServer() {
     {
       title: "Sign a PDF file with certificate and/or signature images",
       description:
-        "Signs a PDF file using the Sign PDF v2 API. Supports adding a visual certificate image and/or " +
-        "one or more signature images at specified positions. Certificate and signature images must be " +
-        "jpeg, jpg, bmp, png, or gif files. " +
-        "certificatePosition and signaturePositions must be valid JSON strings with double quotes. " +
-        "Output is a signed PDF file. Maximum input file size: 100MB.",
-      inputSchema: schemas.SignPdfSchema.shape,
+        "Signs a PDF file using the Sign PDF v2 API. " +
+        "Supports three signing modes (signType): " +
+        "'signature' — place signature images at specified positions; " +
+        "'certificate' — place a visual certificate stamp; " +
+        "'both' — apply both. " +
+        "Always ask the user which signType they want before calling this tool. " +
+        "All image files must be jpeg, jpg, bmp, png, or gif. " +
+        "Position JSON strings must use double quotes. Maximum input file size: 100MB.",
+      inputSchema: schemas.SignPdfBaseSchema.shape,
       annotations: { destructiveHint: true },
     },
     async (params: z.infer<typeof schemas.SignPdfSchema>) => {
