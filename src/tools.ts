@@ -562,10 +562,13 @@ export const SignPdfBaseSchema = z.object({
     .describe(
       "Required when signType is 'certificate' or 'both'. " +
       "Certificate position as a SINGLE JSON OBJECT string (NOT an array). " +
-      'Example: {"pageIndex": 0, "left": 50, "top": 50, "width": 200, "height": 80, ' +
-      '"reason": "Signed using Sign PDF service", "certifyPermission": "AllowFormFill"}. ' +
-      "Fields: pageIndex (zero-based page number), left/top/width/height (position and size in points), " +
-      "reason (optional text), certifyPermission (0 or 'AllowNoChanges' default, 1 or 'AllowFormFill'). " +
+      "IMPORTANT: 'signerFieldId' is required — use a randomly generated UUID. " +
+      'Example: {"pageIndex": 0, "left": 13, "top": 293, "width": 150, "height": 59, ' +
+      '"signerFieldId": "<generate-uuid>", "reason": "Certified", "certifyPermission": "AllowFormFill"}. ' +
+      "Always ask the user for position (left, top, width, height) and page. " +
+      "If user does not specify, use defaults: left:13, top:700, width:150, height:59, pageIndex:0. " +
+      "Fields: pageIndex (zero-based), left/top/width/height (points), signerFieldId (UUID, always required), " +
+      "reason (optional), certifyPermission (0 or 'AllowNoChanges' default, 1 or 'AllowFormFill'). " +
       "IMPORTANT: Must be a single object {}, NOT an array [{}]. Use double quotes in JSON, not single quotes"
     ),
   signaturePaths: z
@@ -582,12 +585,13 @@ export const SignPdfBaseSchema = z.object({
     .optional()
     .describe(
       "Required when signType is 'signature' or 'both'. " +
-      "Signature positions as a JSON array string. Two options:\n" +
-      "Option 1 — create new fields: " +
-      '[{"pageIndex":0,"left":100,"top":200,"width":150,"height":50,"signatureFileName":"mySignature","reason":"Approved"}]\n' +
-      "Option 2 — use existing signer field IDs: " +
-      '[{"pageIndex":0,"signerFieldId":"Signature1","signatureFileName":"mySignature","reason":"Approved"}]\n' +
-      "IMPORTANT: 'signatureFileName' must match the filename (without extension) from signaturePaths. " +
+      "Signature positions as a JSON array string. " +
+      "Always ask the user for position and page. If user does not specify, use defaults: left:50, top:700, width:200, height:60, pageIndex:0. " +
+      "IMPORTANT: 'signerFieldId' must always be included — generate a random UUID (e.g. '550e8400-e29b-41d4-a716-446655440000'). " +
+      "'signatureFileName' and 'reason' are optional — the server auto-fills them from signaturePaths filename and defaults to 'Signed'. " +
+      "Example: " +
+      '[{"pageIndex":0,"left":50,"top":700,"width":200,"height":60,"signerFieldId":"<generate-uuid>"}]\n' +
+      "For existing placeholder fields add the field's signerFieldId instead of generating one. " +
       "Use double quotes in JSON, not single quotes"
     ),
   ownerPassword: z

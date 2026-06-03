@@ -108,17 +108,6 @@ export type ErrorStatus =
   | "licensE_KEY_REQUEST_LIMIT_EXCEEDED"
   | "scopE_FIELD_REQUIRED";
 
-function extractApiErrorDetail(errorData: unknown): string | null {
-  if (!errorData || typeof errorData !== "object") return null;
-  const d = errorData as Record<string, unknown>;
-  const code = typeof d.error === "string" ? d.error : null;
-  const msg = typeof d.message === "string" ? d.message : null;
-  if (code && msg) return `${code}: ${msg}`;
-  if (code) return code;
-  if (msg) return msg;
-  return null;
-}
-
 // PDF Convert types
 export type ConvertType = "word" | "powerPoint" | "excel";
 export type ConvertPdfToExcelType =
@@ -344,9 +333,8 @@ export class AvanquestPdfApiClient {
           `[avanquest-pdf-api] Upload to ${endpoint} failed with HTTP ${response.status}:`,
           errorData
         );
-        const detail = extractApiErrorDetail(errorData);
         throw new PdfApiRequestError(
-          `PDF API request failed with HTTP ${response.status}.${detail ? ` ${detail}` : " Please verify the input file and parameters and try again."}`,
+          `PDF API request failed with HTTP ${response.status}. Please verify the input file and parameters and try again.`,
           response.status
         );
       }
@@ -478,13 +466,8 @@ export class AvanquestPdfApiClient {
         case "completed":
           return;
         case "failed": {
-          const errDetail = extractApiErrorDetail(status.error);
-          console.error(
-            `[avanquest-pdf-api] Operation ${operationId} failed:`,
-            status.error
-          );
           throw new PdfApiRequestError(
-            `PDF API operation failed.${errDetail ? ` ${errDetail}` : " Please verify the input file and parameters and try again."}`
+            `PDF API operation failed. Please verify the input file and parameters and try again.`
           );
         }
         case "pending":
@@ -581,9 +564,25 @@ export class AvanquestPdfApiClient {
     filePath: string
   ): Promise<void> {
     const buffer = await this.readFileAsync(filePath);
+    const mimeTypes: Record<string, string> = {
+      ".pdf": "application/pdf",
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".png": "image/png",
+      ".gif": "image/gif",
+      ".bmp": "image/bmp",
+      ".tiff": "image/tiff",
+      ".tif": "image/tiff",
+      ".webp": "image/webp",
+      ".heic": "image/heic",
+      ".txt": "text/plain",
+      ".html": "text/html",
+      ".htm": "text/html",
+    };
+    const mime = mimeTypes[extname(filePath).toLowerCase()] ?? "application/octet-stream";
     formData.append(
       fieldName,
-      new Blob([new Uint8Array(buffer)]),
+      new Blob([new Uint8Array(buffer)], { type: mime }),
       basename(filePath)
     );
   }
@@ -1094,7 +1093,13 @@ export class AvanquestPdfApiClient {
       await this.appendFileToForm(formData, "certificate", options.certificatePath);
     }
     if (options.certificatePosition) {
-      formData.append("certificatePosition", options.certificatePosition);
+      try {
+        const pos = JSON.parse(options.certificatePosition) as Record<string, unknown>;
+        const enriched = { reason: "Certified", ...pos };
+        formData.append("certificatePosition", JSON.stringify(enriched));
+      } catch {
+        formData.append("certificatePosition", options.certificatePosition);
+      }
     }
 
     if (options.signaturePaths && options.signaturePaths.length > 0) {
@@ -1104,7 +1109,21 @@ export class AvanquestPdfApiClient {
       }
     }
     if (options.signaturePositions) {
-      formData.append("signaturePositions", options.signaturePositions);
+      // Auto-fill signatureFileName (from first signaturePath, without extension) and default reason
+      const firstSigName = options.signaturePaths && options.signaturePaths.length > 0
+        ? basename(options.signaturePaths[0]).replace(/\.[^.]+$/, "")
+        : undefined;
+      try {
+        const positions = JSON.parse(options.signaturePositions) as Record<string, unknown>[];
+        const enriched = positions.map((pos) => ({
+          ...pos,
+          signatureFileName: pos["signatureFileName"] ?? firstSigName,
+          reason: pos["reason"] ?? "Signed",
+        }));
+        formData.append("signaturePositions", JSON.stringify(enriched));
+      } catch {
+        formData.append("signaturePositions", options.signaturePositions);
+      }
     }
 
     if (options.ownerPassword) formData.append("ownerPassword", options.ownerPassword);
