@@ -428,6 +428,30 @@ export const AddWatermarkToPdfSchema = z.object({
     ),
 });
 
+// Zod schema for Document Extract tool
+export const DocumentExtractSchema = z.object({
+  filePath: z
+    .string()
+    .describe(
+      "Path to the file to extract data from. Supported formats: pdf, jpg, jpeg, png, tiff, tif, bmp, gif, heic, webp. " +
+      "Maximum file size: 100MB"
+    ),
+  outputPath: z
+    .string()
+    .describe("Path where the extracted Markdown document should be saved (.md)"),
+  password: z
+    .string()
+    .optional()
+    .describe("Password to open the PDF file (if password-protected)"),
+  pages: z
+    .string()
+    .optional()
+    .describe(
+      "Pages to process. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to process all pages"
+    ),
+});
+
 // Zod schema for OCR tool
 export const OcrPdfSchema = z.object({
   filePath: z
