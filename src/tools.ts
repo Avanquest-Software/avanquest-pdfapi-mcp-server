@@ -516,3 +516,98 @@ export const PdfAnalyzeTagSchema = z.object({
       "dashes (e.g., '3-7'). Leave empty to analyze all pages"
     ),
 });
+
+// Zod schema for Sign PDF tool (v2)
+export const SignPdfSchema = z.object({
+  filePath: z.string().describe("Path to the PDF file to sign. Supported format: pdf. Maximum file size: 100MB"),
+  outputPath: z.string().describe("Path where the signed PDF should be saved (.pdf)"),
+  password: z
+    .string()
+    .optional()
+    .describe("Password to open/authenticate the PDF file (if password-protected)"),
+  pages: z
+    .string()
+    .optional()
+    .describe(
+      "Pages to process. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to process all pages"
+    ),
+  certificatePath: z
+    .string()
+    .optional()
+    .describe(
+      "Path to the certificate image file to use when signing. Supported image types: jpeg, jpg, bmp, png, gif. " +
+      "This is a visual certificate image, not a cryptographic certificate. Optional — you can sign without it"
+    ),
+  certificatePosition: z
+    .string()
+    .optional()
+    .describe(
+      "Certificate position as a SINGLE JSON OBJECT string (NOT an array) — required if certificatePath is provided. " +
+      'Example: {"pageIndex": 0, "left": 50, "top": 50, "width": 200, "height": 80, ' +
+      '"reason": "Signed using Sign PDF service", "certifyPermission": "AllowFormFill"}. ' +
+      "Fields: pageIndex (zero-based page number), left/top/width/height (position and size in points), " +
+      "reason (optional text), certifyPermission (0 or 'AllowNoChanges' default, 1 or 'AllowFormFill'). " +
+      "IMPORTANT: Must be a single object {}, NOT an array [{}]. Use double quotes in JSON, not single quotes"
+    ),
+  signaturePaths: z
+    .array(z.string())
+    .optional()
+    .describe(
+      "Paths to signature image files. Supported image types: jpeg, jpg, bmp, png, gif. " +
+      "You can provide multiple signature files — reference them by filename (without extension) " +
+      "in signaturePositions via the 'signatureFileName' property"
+    ),
+  signaturePositions: z
+    .string()
+    .optional()
+    .describe(
+      "Signature positions as a JSON array string. Two options:\n" +
+      "Option 1 — create new fields: " +
+      '[{"pageIndex":0,"left":100,"top":200,"width":150,"height":50,"signatureFileName":"mySignature","reason":"Approved"}]\n' +
+      "Option 2 — use existing signer field IDs: " +
+      '[{"pageIndex":0,"signerFieldId":"Signature1","signatureFileName":"mySignature","reason":"Approved"}]\n' +
+      "IMPORTANT: Use double quotes in JSON, not single quotes"
+    ),
+  ownerPassword: z
+    .string()
+    .optional()
+    .describe(
+      "Optional owner password to SET on the PDF (for adding NEW encryption). " +
+      "Only used if the document does not already have an owner password. " +
+      "To open an already-encrypted PDF use the 'password' field instead"
+    ),
+});
+
+// Zod schema for Sign PDF Placeholder tool (v2)
+export const SignPdfPlaceholderSchema = z.object({
+  filePath: z.string().describe("Path to the PDF file to prepare with empty signature fields. Supported format: pdf. Maximum file size: 100MB"),
+  outputPath: z.string().describe("Path where the PDF with placeholder signature fields should be saved (.pdf)"),
+  positions: z
+    .string()
+    .describe(
+      "Signature field positions as a JSON array string (required). Each position must include: " +
+      "pageIndex (zero-based page number), left, top, width, height, signerFieldId (unique identifier). " +
+      'Example: [{"pageIndex":0,"left":50,"top":150,"width":200,"height":80,"signerFieldId":"Certificate"},' +
+      '{"pageIndex":0,"left":50,"top":250,"width":200,"height":80,"signerFieldId":"Signature1"}]. ' +
+      "IMPORTANT: Use double quotes in JSON, not single quotes"
+    ),
+  password: z
+    .string()
+    .optional()
+    .describe("Password to open/authenticate the PDF file (if password-protected)"),
+  pages: z
+    .string()
+    .optional()
+    .describe(
+      "Pages to process. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
+      "dashes (e.g., '3-7'). Leave empty to process all pages"
+    ),
+  ownerPassword: z
+    .string()
+    .optional()
+    .describe(
+      "Optional owner password to SET on the PDF (for adding NEW encryption to the placeholder document). " +
+      "Use the 'password' field (not ownerPassword) in subsequent signing calls to authenticate with this password"
+    ),
+});

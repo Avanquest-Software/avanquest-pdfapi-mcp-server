@@ -108,6 +108,17 @@ export type ErrorStatus =
   | "licensE_KEY_REQUEST_LIMIT_EXCEEDED"
   | "scopE_FIELD_REQUIRED";
 
+function extractApiErrorDetail(errorData: unknown): string | null {
+  if (!errorData || typeof errorData !== "object") return null;
+  const d = errorData as Record<string, unknown>;
+  const code = typeof d.error === "string" ? d.error : null;
+  const msg = typeof d.message === "string" ? d.message : null;
+  if (code && msg) return `${code}: ${msg}`;
+  if (code) return code;
+  if (msg) return msg;
+  return null;
+}
+
 // PDF Convert types
 export type ConvertType = "word" | "powerPoint" | "excel";
 export type ConvertPdfToExcelType =
@@ -259,6 +270,22 @@ export interface PdfInsightOptions {
   modelType?: "external" | "internal";
 }
 
+export interface SignPdfOptions {
+  password?: string;
+  pages?: string;
+  certificatePath?: string;
+  certificatePosition?: string;
+  signaturePaths?: string[];
+  signaturePositions?: string;
+  ownerPassword?: string;
+}
+
+export interface SignPdfPlaceholderOptions {
+  password?: string;
+  pages?: string;
+  ownerPassword?: string;
+}
+
 // Allowed input extensions, kept here so the source of truth is in one place
 const PDF_EXTS: readonly string[] = [".pdf"];
 const IMAGE_EXTS: readonly string[] = [".jpg", ".jpeg", ".bmp", ".png", ".gif"];
@@ -317,8 +344,9 @@ export class AvanquestPdfApiClient {
           `[avanquest-pdf-api] Upload to ${endpoint} failed with HTTP ${response.status}:`,
           errorData
         );
+        const detail = extractApiErrorDetail(errorData);
         throw new PdfApiRequestError(
-          `PDF API request failed with HTTP ${response.status}. Please verify the input file and parameters and try again.`,
+          `PDF API request failed with HTTP ${response.status}.${detail ? ` ${detail}` : " Please verify the input file and parameters and try again."}`,
           response.status
         );
       }
@@ -449,14 +477,16 @@ export class AvanquestPdfApiClient {
       switch (status.status) {
         case "completed":
           return;
-        case "failed":
+        case "failed": {
+          const errDetail = extractApiErrorDetail(status.error);
           console.error(
             `[avanquest-pdf-api] Operation ${operationId} failed:`,
             status.error
           );
           throw new PdfApiRequestError(
-            "PDF API operation failed. Please verify the input file and parameters and try again."
+            `PDF API operation failed.${errDetail ? ` ${errDetail}` : " Please verify the input file and parameters and try again."}`
           );
+        }
         case "pending":
         case "processing":
           break;
@@ -1036,6 +1066,78 @@ export class AvanquestPdfApiClient {
     if (options.pages) formData.append("pages", options.pages);
 
     const operation = await this.uploadFile("/pdf-analyze-tag/v1", formData);
+    await this.pollOperationUntilComplete(operation.id);
+    const result = await this.downloadOperationResult(operation.id);
+
+    return { operationId: operation.id, result };
+  }
+
+  /**
+   * Signs a PDF with certificate and/or signature images (v2).
+   * certificate and signatures must be image files (jpeg, jpg, bmp, png, gif).
+   * certificatePosition and signaturePositions must be valid JSON strings with double quotes.
+   */
+  async signPdf(
+    filePath: string,
+    options: SignPdfOptions = {}
+  ): Promise<{ operationId: string; result: Buffer }> {
+    await this.validateFilePath(filePath, PDF_EXTS);
+
+    const formData = new FormData();
+    await this.appendFileToForm(formData, "file", filePath);
+
+    if (options.password) formData.append("password", options.password);
+    if (options.pages) formData.append("pages", options.pages);
+
+    if (options.certificatePath) {
+      await this.validateFilePath(options.certificatePath, IMAGE_EXTS);
+      await this.appendFileToForm(formData, "certificate", options.certificatePath);
+    }
+    if (options.certificatePosition) {
+      formData.append("certificatePosition", options.certificatePosition);
+    }
+
+    if (options.signaturePaths && options.signaturePaths.length > 0) {
+      for (const sigPath of options.signaturePaths) {
+        await this.validateFilePath(sigPath, IMAGE_EXTS);
+        await this.appendFileToForm(formData, "signatures", sigPath);
+      }
+    }
+    if (options.signaturePositions) {
+      formData.append("signaturePositions", options.signaturePositions);
+    }
+
+    if (options.ownerPassword) formData.append("ownerPassword", options.ownerPassword);
+
+    const operation = await this.uploadFile("/sign-pdf/v2", formData);
+    await this.pollOperationUntilComplete(operation.id);
+    const result = await this.downloadOperationResult(operation.id);
+
+    return { operationId: operation.id, result };
+  }
+
+  /**
+   * Creates empty signature placeholder fields in a PDF (v2).
+   * positions must be a valid JSON array string.
+   */
+  async signPdfPlaceholder(
+    filePath: string,
+    positions: string,
+    options: SignPdfPlaceholderOptions = {}
+  ): Promise<{ operationId: string; result: Buffer }> {
+    await this.validateFilePath(filePath, PDF_EXTS);
+
+    const formData = new FormData();
+    await this.appendFileToForm(formData, "file", filePath);
+
+    if (options.password) formData.append("password", options.password);
+    if (options.pages) formData.append("pages", options.pages);
+
+    formData.append("positions", positions);
+
+    if (options.ownerPassword) formData.append("ownerPassword", options.ownerPassword);
+
+    const operation = await this.uploadFile("/sign-pdf/v2/placeholder", formData);
     await this.pollOperationUntilComplete(operation.id);
     const result = await this.downloadOperationResult(operation.id);
 
