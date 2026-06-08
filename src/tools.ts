@@ -622,36 +622,3 @@ export const SignPdfSchema = SignPdfBaseSchema.superRefine((data, ctx) => {
     }
   }
 });
-
-// Zod schema for Sign PDF Placeholder tool (v2)
-export const SignPdfPlaceholderSchema = z.object({
-  filePath: z.string().describe("Path to the PDF file to prepare with empty signature fields. Supported format: pdf. Maximum file size: 100MB"),
-  outputPath: z.string().describe("Path where the PDF with placeholder signature fields should be saved (.pdf)"),
-  positions: z
-    .string()
-    .describe(
-      "Signature field positions as a JSON array string (required). Each position must include: " +
-      "pageIndex (zero-based page number), left, top, width, height, signerFieldId (unique identifier). " +
-      'Example: [{"pageIndex":0,"left":50,"top":150,"width":200,"height":80,"signerFieldId":"Certificate"},' +
-      '{"pageIndex":0,"left":50,"top":250,"width":200,"height":80,"signerFieldId":"Signature1"}]. ' +
-      "IMPORTANT: Use double quotes in JSON, not single quotes"
-    ),
-  password: z
-    .string()
-    .optional()
-    .describe("Password to open/authenticate the PDF file (if password-protected)"),
-  pages: z
-    .string()
-    .optional()
-    .describe(
-      "Pages to process. Specify page numbers separated by commas (e.g., '1,3,5') or ranges with " +
-      "dashes (e.g., '3-7'). Leave empty to process all pages"
-    ),
-  ownerPassword: z
-    .string()
-    .optional()
-    .describe(
-      "Optional owner password to SET on the PDF (for adding NEW encryption to the placeholder document). " +
-      "Use the 'password' field (not ownerPassword) in subsequent signing calls to authenticate with this password"
-    ),
-});

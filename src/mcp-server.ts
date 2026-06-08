@@ -1,4 +1,4 @@
-import { extname } from "path";
+﻿import { extname } from "path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { writeFile } from "fs/promises";
@@ -880,47 +880,6 @@ export function createMcpServer() {
 
         return makeSuccessResponse(
           `Successfully signed the PDF.\n\n` +
-          `Operation ID: ${result.operationId}\n` +
-          `Output saved to: ${input.outputPath}`
-        );
-      } catch (error: unknown) {
-        return makeErrorResponse(error);
-      }
-    }
-  );
-
-  // Register sign_pdf_placeholder tool
-  server.registerTool(
-    "sign_pdf_placeholder",
-    {
-      title: "Add empty signature placeholder fields to a PDF file",
-      description:
-        "Creates empty signature placeholder fields in a PDF file using the Sign PDF v2 placeholder API. " +
-        "Useful for multi-step workflows: first create placeholders (step 1), then sign each field " +
-        "using sign_pdf with signerFieldId (steps 2+). " +
-        "positions must be a valid JSON array string with double quotes. " +
-        "Output is a PDF with empty signature widgets. Maximum input file size: 100MB.",
-      inputSchema: schemas.SignPdfPlaceholderSchema.shape,
-      annotations: { destructiveHint: true },
-    },
-    async (params: z.infer<typeof schemas.SignPdfPlaceholderSchema>) => {
-      try {
-        const input = schemas.SignPdfPlaceholderSchema.parse(params);
-        validateOutputPath(input.outputPath, ".pdf");
-        const result = await apiClient.signPdfPlaceholder(
-          input.filePath,
-          input.positions,
-          {
-            password: input.password,
-            pages: input.pages,
-            ownerPassword: input.ownerPassword,
-          }
-        );
-
-        await writeFile(input.outputPath, result.result);
-
-        return makeSuccessResponse(
-          `Successfully added signature placeholders to the PDF.\n\n` +
           `Operation ID: ${result.operationId}\n` +
           `Output saved to: ${input.outputPath}`
         );

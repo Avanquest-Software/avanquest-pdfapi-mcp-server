@@ -269,12 +269,6 @@ export interface SignPdfOptions {
   ownerPassword?: string;
 }
 
-export interface SignPdfPlaceholderOptions {
-  password?: string;
-  pages?: string;
-  ownerPassword?: string;
-}
-
 // Allowed input extensions, kept here so the source of truth is in one place
 const PDF_EXTS: readonly string[] = [".pdf"];
 const IMAGE_EXTS: readonly string[] = [".jpg", ".jpeg", ".bmp", ".png", ".gif"];
@@ -1129,34 +1123,6 @@ export class AvanquestPdfApiClient {
     if (options.ownerPassword) formData.append("ownerPassword", options.ownerPassword);
 
     const operation = await this.uploadFile("/sign-pdf/v2", formData);
-    await this.pollOperationUntilComplete(operation.id);
-    const result = await this.downloadOperationResult(operation.id);
-
-    return { operationId: operation.id, result };
-  }
-
-  /**
-   * Creates empty signature placeholder fields in a PDF (v2).
-   * positions must be a valid JSON array string.
-   */
-  async signPdfPlaceholder(
-    filePath: string,
-    positions: string,
-    options: SignPdfPlaceholderOptions = {}
-  ): Promise<{ operationId: string; result: Buffer }> {
-    await this.validateFilePath(filePath, PDF_EXTS);
-
-    const formData = new FormData();
-    await this.appendFileToForm(formData, "file", filePath);
-
-    if (options.password) formData.append("password", options.password);
-    if (options.pages) formData.append("pages", options.pages);
-
-    formData.append("positions", positions);
-
-    if (options.ownerPassword) formData.append("ownerPassword", options.ownerPassword);
-
-    const operation = await this.uploadFile("/sign-pdf/v2/placeholder", formData);
     await this.pollOperationUntilComplete(operation.id);
     const result = await this.downloadOperationResult(operation.id);
 
