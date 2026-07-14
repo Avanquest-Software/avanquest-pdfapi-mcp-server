@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "Avanquest PDF API",
   "display_name": "Avanquest PDF API Extension",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "MCP server for the Avanquest PDF API, offering scalable tools for PDF conversion, merging, compression, splitting, and advanced document processing automation.",
   "long_description": "MCP server enabling Claude Desktop to access powerful PDF tools via the Avanquest PDF API. Features include converting PDFs to multiple formats and back, merging and splitting files, compression, page editing, password protection, watermarking, and advanced analysis of tags, forms, signatures, and attachments.",
   "author": {
